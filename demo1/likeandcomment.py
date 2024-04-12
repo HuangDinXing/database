@@ -30,7 +30,7 @@ def get_like_count_from_database():
 @app.route('/')
 def index():
     data = get_like_count_from_database()
-    return render_template('index.html', data=data)
+    return render_template('index.html', like_count=data)
 
 @app.route('/record_like', methods=['POST'])
 def record_like():
@@ -90,6 +90,13 @@ def save_comment():
     
     # 返回成功的响应
     return jsonify({'success': True})
+
+@app.route('/get_like_count', methods=['GET'])
+def get_like_count():
+    # 获取点赞次数
+    like_count = get_like_count_from_database()
+    # 将点赞次数作为 JSON 响应发送给客户端
+    return jsonify({'like_count': like_count})
 
 if __name__ == '__main__':
     app.run(debug=True)
