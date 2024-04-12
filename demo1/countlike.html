@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点赞按钮示例</title>
+</head>
+<body>
+    <h1>点赞按钮示例</h1>
+    <p>点击按钮以点赞：</p>
+    <button id="likeButton">点赞</button>
+    <p>点赞次数：<span id="likeCount">{{ like_count }}</span></p>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#likeButton').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/record_like',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#likeCount').text(response.like_count);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('发生错误:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
