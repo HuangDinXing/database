@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+
+void make_random_graph(int n,int e){//n=vertex       e=edge
+    n=n-1;
+    e=e-1;
+    int graph[n][n];
+    srand(time(NULL));
+    int k=0;
+    for(int j=0;j<=n;j++){    
+        for(int i=k;i<=n;i++){
+            if(i==j){
+                graph[j][i]=0;
+                continue;
+            }
+            graph[j][i]=rand()%2;
+            graph[i][j]=graph[j][i];//graph copy
+        }
+        k=k+1;
+    }
+    for(int j=0;j<=n;j++){
+        for(int i=0;i<=n;i++){
+            cout<<graph[j][i]<<' ';
+        }
+        cout<<endl;
+    }
+    
+}
+
+
+int main(){
+    make_random_graph(5,5);
+    
+    
+}
