@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点赞按钮示例</title>
+</head>
+<body>
+    <h1>点赞按钮示例</h1>
+    <p>点击按钮以点赞：</p>
+    <button id="likeButton" data-liked="{{ liked }}">点赞</button>
+    <p>点赞次数：<span id="likeCount">{{ like_count }}</span></p>
+
+    <p>留言：</p>
+    <input type="text" id="commentInput">
+    <button id="submitComment">提交留言</button>
+
+    <div id="comments">
+        <!-- 这里可以显示已有的留言 -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 点赞按钮状态
+            var liked = $('#likeButton').data('liked');
+
+            // 更新点赞按钮文本
+            updateLikeButtonText();
+
+            // 点击按钮切换点赞状态
+            $('#likeButton').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/record_like',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        // 更新点赞数量显示
+                        $('#likeCount').text(response.like_count);
+                        // 更新点赞按钮状态
+                        liked = !liked;
+                        updateLikeButtonText();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('发生错误:', error);
+                    }
+                });
+            });
+
+            // 更新点赞按钮文本
+            function updateLikeButtonText() {
+                if (liked) {
+                    $('#likeButton').text('取消赞');
+                } else {
+                    $('#likeButton').text('点赞');
+                }
+            }
+
+            // 提交留言按钮点击事件
+            $('#submitComment').click(function() {
+                var comment = $('#commentInput').val();
+                // 将留言发送到服务器保存，这里使用POST请求
+                $.ajax({
+                    type: 'POST',
+                    url: '/save_comment',
+                    contentType: 'application/json',
+                    data: JSON.stringify({comment: comment}),
+                    success: function(response) {
+                        if (response.success) {
+                            // 清空输入框内容
+                            $('#commentInput').val('');
+                            // 显示新的留言
+                            $('#comments').append('<p>' + comment + '</p>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('发生错误:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
