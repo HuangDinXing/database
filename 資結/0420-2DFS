@@ -1,0 +1,91 @@
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void make_random_graph(int n, int e, int graph[100][100]) {
+    srand(time(NULL));
+    int count_edge = 0;
+
+    // 初始化图中所有边为0
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            graph[j][i] = 0;
+        }
+    }
+
+    // 生成随机边
+    while (count_edge < e) {
+        int i = rand() % n;
+        int j = rand() % n;
+
+        if (i != j && graph[i][j] == 0) { // 确保边未重复计算且不是自环
+            graph[i][j] = graph[j][i] = 1; // 设置边
+            count_edge++;
+        }
+    }
+
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            cout<<graph[j][i]<<" ";
+        }
+        cout<<endl;
+    }
+}
+
+void DFS_visit(int u, int n, int graph[100][100], vector<int>& visited, vector<int>& discovery_time, vector<int>& finish_time, int& time) {
+    visited[u] = 1; // 标记节点已访问
+    time++; // 增加时间
+
+    // 输出节点的发现时间
+    cout << "Discover time of vertex " << char('A' + u) << ": " << time << endl;
+
+    // 找到与节点u相邻的节点，并按照字母顺序排序
+    vector<int> adj_vertices;
+    for (int v = 0; v < n; v++) {
+        if (graph[u][v] == 1 && visited[v] == 0) {
+            adj_vertices.push_back(v);
+        }
+    }
+    sort(adj_vertices.begin(), adj_vertices.end());
+
+    // 递归访问相邻节点
+    for (int v : adj_vertices) {
+        if (visited[v] == 0) { // 仅对未访问的节点进行访问
+            DFS_visit(v, n, graph, visited, discovery_time, finish_time, time);
+        }
+    }
+
+    time++; // 增加时间
+
+    // 输出节点的完成时间
+    cout << "Finish time of vertex " << char('A' + u) << ": " << time << endl;
+}
+
+void DFS(int n, int graph[100][100]) {
+    vector<int> visited(n, 0); // 标记节点是否被访问
+    vector<int> discovery_time(n, 0); // 记录节点的发现时间
+    vector<int> finish_time(n, 0); // 记录节点的完成时间
+    int time = 0; // 计时器
+
+    // 从节点A开始进行DFS
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            DFS_visit(u, n, graph, visited, discovery_time, finish_time, time);
+        }
+    }
+}
+
+int main(){
+    int n=5,e=5,count_edge=0;
+    /*cin>>n;
+    cin>>e;
+    */
+    int graph[100][100];
+    make_random_graph(n,e,graph);
+    DFS(n,graph);
+
+    return 0;
+}
