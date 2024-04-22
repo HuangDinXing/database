@@ -35,6 +35,28 @@ void make_random_graph(int n, int e, int graph[100][100]) {
         }
         cout<<endl;
     }
+    cout<<endl;
+}
+
+void make_adj_list(int n,int graph[100][100]){
+    int k=0,h=0;
+    char A='A';
+    for(int j=0;j<n;j++){
+        cout<<char(A+k)<<"[ ]";
+        for(int i=0;i<n;i++){
+    
+            if(graph[j][i]==1){
+                cout<<"-> "<<char('A'+h);
+            }
+            h=h+1;
+            
+        }
+        h=0;
+        k=k+1;
+        cout<<endl;
+    }
+    cout<<endl;
+    
 }
 
 void build_adjacency_list(int n, vector<int>& parent, unordered_map<int, vector<int>>& adj_list) {
@@ -46,14 +68,15 @@ void build_adjacency_list(int n, vector<int>& parent, unordered_map<int, vector<
 }
 
 void print_adjacency_list(const unordered_map<int, vector<int>>& adj_list, const string& tree_type) {
-    cout << tree_type << " Tree (Adjacency List Representation):" << endl;
+    cout << tree_type << " Tree (串列表示):" << endl;
     for (const auto& pair : adj_list) {
-        cout << "Vertex " << char('A' + pair.first) << ": ";
+        cout << char('A' + pair.first)<< "[]";
         for (int v : pair.second) {
-            cout << char('A' + v) << " ";
+            cout << "-> "<< char('A' + v) ;
         }
         cout << endl;
     }
+    cout<<endl;
 }
 
 void DFS_visit(int u, int n, int graph[100][100], vector<int>& visited, vector<int>& parent, int& time) {
@@ -123,12 +146,15 @@ void BFS(int n, int graph[100][100]) {
 }
 
 int main(){
-    int n=5,e=5,count_edge=0;
-    /*cin>>n;
+    int n,e;
+    cout<<"vertex數目：";
+    cin>>n;
+    cout<<"edge數目：";
     cin>>e;
-    */
+    cout<<endl;
     int graph[100][100];
     make_random_graph(n,e,graph);
+    make_adj_list(n,graph);
     DFS(n,graph);
     BFS(n,graph);
 
