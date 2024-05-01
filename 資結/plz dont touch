@@ -1,0 +1,256 @@
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <unordered_map> 
+#include <fstream>
+using namespace std;
+
+void make_random_graph(int n, int e, int graph[100][100]) {
+    srand(time(NULL));
+    int count_edge = 0;
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            graph[j][i] = 0;
+        }
+    }
+
+    while (count_edge < e) {
+        int i = rand() % n;
+        int j = rand() % n;
+
+        if (i != j && graph[i][j] == 0) {
+            graph[i][j] = graph[j][i] = 1;
+            count_edge++;
+        }
+    }
+
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            cout<<graph[j][i]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
+}
+
+void make_adj_list(int n,int graph[100][100]){
+    int k=0,h=0;
+    char A='A';
+    for(int j=0;j<n;j++){
+        cout<<char(A+k)<<"[ ]";
+        for(int i=0;i<n;i++){
+
+            if(graph[j][i]==1){
+                cout<<"-> "<<char('A'+h);
+            }
+            h=h+1;
+
+        }
+        h=0;
+        k=k+1;
+        cout<<endl;
+    }
+    cout<<endl;
+}
+
+void build_adjacency_list(int n, vector<int>& parent, unordered_map<int, vector<int>>& adj_list) {
+    for (int i = 0; i < n; i++) {
+        if (parent[i] != -1) {
+            adj_list[parent[i]].push_back(i);
+        }
+    }
+}
+
+
+void print_adjacency_list(const vector<vector<int>>& adj_list, const string& tree_type) {
+    cout << tree_type << " Tree (串列表示):" << endl;
+    for (int i = 0; i < adj_list.size(); ++i) {
+        cout << char('A' + i) << "[ ]";
+        if (adj_list[i].empty()) {
+            cout << "-> no child" << endl;
+        } else {
+            for (int v : adj_list[i]) {
+                cout << "-> " << char('A' + v);
+            }
+            cout << endl;
+        }
+    }
+    cout<<endl;
+}
+
+void DFS_visit(int u, int n, int graph[100][100], vector<int>& visited, vector<int>& parent, int& time) {
+    visited[u] = 1;
+    time++;
+
+    for (int v = 0; v < n; v++) {
+        if (graph[u][v] == 1 && visited[v] == 0) {
+            parent[v] = u;
+            DFS_visit(v, n, graph, visited, parent, time);
+        }
+    }
+
+    time++;
+}
+
+void DFS(int n, int graph[100][100]) {
+    vector<int> parent(n, -1);
+    vector<int> visited(n, 0);
+    int time = 0;
+
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            DFS_visit(u, n, graph, visited, parent, time);
+        }
+    }
+
+    unordered_map<int, vector<int>> adj_list;
+    build_adjacency_list(n, parent, adj_list);
+
+    // 打印 DFS tree 的鄰接列表
+    cout << "DFS Tree (串列表示):" << endl;
+    for (int u = 0; u < n; u++) {
+        cout << char('A' + u) << "[ ]";
+        if (adj_list.find(u) == adj_list.end()) {
+            cout << "-> no child" << endl;
+        } else {
+            for (int v : adj_list[u]) {
+                cout << "-> " << char('A' + v);
+            }
+            cout << endl;
+        }
+    }
+    cout << endl;
+
+    // 保存 DFS tree 的鄰接矩陣到 CSV 文件
+    ofstream DFSFile("DFS_tree.csv");
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            DFSFile << ((parent[v] == u) ? 1 : 0);
+            if (v != n - 1) DFSFile << ",";
+        }
+        DFSFile << endl;
+    }
+    DFSFile.close();
+
+    cout << "DFS tree matrix saved as DFS_tree.csv" << endl;
+}
+
+void BFS(int n, int graph[100][100]) {
+    vector<int> parent(n, -1);
+    vector<int> visited(n, 0);
+
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            queue<int> q;
+            q.push(u);
+            visited[u] = 1;
+
+            while (!q.empty()) {
+                int v = q.front();
+                q.pop();
+
+                for (int w = 0; w < n; w++) {
+                    if (graph[v][w] == 1 && visited[w] == 0) {
+                        visited[w] = 1;
+                        parent[w] = v;
+                        q.push(w);
+                    }
+                }
+            }
+        }
+    }
+
+    // 构建 BFS ?的?接矩?
+    vector<vector<int>> bfs_tree(n, vector<int>(n, 0));
+    for (int u = 0; u < n; u++) {
+        if (parent[u] != -1) {
+            bfs_tree[parent[u]][u] = 1;
+            bfs_tree[u][parent[u]] = 1; // ?向
+        }
+    }
+
+    // 打印 BFS ?的?接表
+    cout << "BFS Tree (?接表表示):" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << char('A' + i) << "[ ]";
+        for (int j = 0; j < n; ++j) {
+            if (bfs_tree[i][j] == 1) {
+                cout << "-> " << char('A' + j);
+            }
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    // 保存 BFS ?的?接矩?到 CSV 文件
+    ofstream BFSFile("BFS_tree.csv");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            BFSFile << bfs_tree[i][j];
+            if (j != n - 1) BFSFile << ",";
+        }
+        BFSFile << endl;
+    }
+    BFSFile.close();
+
+    cout << "BFS tree matrix saved as BFS_tree.csv" << endl;
+}
+
+
+
+
+
+void show_vertex_edges(int n,int graph[100][100]){
+    cout<<endl;
+    int k=0,h=0;
+    char A='A';
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            if(graph[j][i]==1){
+                cout<<char('A'+k)<<endl;
+            }
+            h=h+1;
+
+        }
+        k=k+1;
+        h=0;
+    }
+    cout<<"------------"<<endl;
+    k=0,h=0;
+    A='A';
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            if(graph[j][i]==1){
+                cout<<char('A'+h)<<endl;
+            }
+            h=h+1;
+
+        }
+        k=k+1;
+        h=0;
+    }
+}
+
+int main(){
+    int n,e;
+    cout<<"vertex數目：";
+    cin>>n;
+    cout<<"edge數目：";
+    cin>>e;
+    if(e>((n*(n-1))/2)){
+        cout<<"error";
+        return 0;
+    }
+    cout<<endl;
+    int graph[100][100];
+    make_random_graph(n,e,graph);
+    make_adj_list(n,graph);
+    DFS(n,graph);
+    BFS(n,graph);
+    show_vertex_edges(n,graph);
+    return 0;
+}
