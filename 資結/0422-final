@@ -11,20 +11,18 @@ void make_random_graph(int n, int e, int graph[100][100]) {
     srand(time(NULL));
     int count_edge = 0;
 
-    // 初始化?中所有??0
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++) {
             graph[j][i] = 0;
         }
     }
 
-    // 生成?机?
     while (count_edge < e) {
         int i = rand() % n;
         int j = rand() % n;
 
-        if (i != j && graph[i][j] == 0) { // 确保?未重复?算且不是自?
-            graph[i][j] = graph[j][i] = 1; // ?置?
+        if (i != j && graph[i][j] == 0) {
+            graph[i][j] = graph[j][i] = 1;
             count_edge++;
         }
     }
@@ -44,19 +42,18 @@ void make_adj_list(int n,int graph[100][100]){
     for(int j=0;j<n;j++){
         cout<<char(A+k)<<"[ ]";
         for(int i=0;i<n;i++){
-    
+
             if(graph[j][i]==1){
                 cout<<"-> "<<char('A'+h);
             }
             h=h+1;
-            
+
         }
         h=0;
         k=k+1;
         cout<<endl;
     }
     cout<<endl;
-    
 }
 
 void build_adjacency_list(int n, vector<int>& parent, unordered_map<int, vector<int>>& adj_list) {
@@ -80,70 +77,108 @@ void print_adjacency_list(const unordered_map<int, vector<int>>& adj_list, const
 }
 
 void DFS_visit(int u, int n, int graph[100][100], vector<int>& visited, vector<int>& parent, int& time) {
-    visited[u] = 1; // ????已??
-    time++; // 增加??
+    visited[u] = 1;
+    time++;
 
-    // 找到与??u相?的??
     for (int v = 0; v < n; v++) {
-        if (graph[u][v] == 1 && visited[v] == 0) { // 如果??v是??u的?居且未???
-            parent[v] = u; // ?置??v的父???u
+        if (graph[u][v] == 1 && visited[v] == 0) {
+            parent[v] = u;
             DFS_visit(v, n, graph, visited, parent, time);
         }
     }
 
-    time++; // 增加??
+    time++;
 }
 
 void DFS(int n, int graph[100][100]) {
-    vector<int> parent(n, -1); // ????的父??，初始?-1表示?有父??
-    vector<int> visited(n, 0); // ????是否被??
-    int time = 0; // ??器
+    vector<int> parent(n, -1);
+    vector<int> visited(n, 0);
+    int time = 0;
 
-    // ???A?始?行DFS
     for (int u = 0; u < n; u++) {
         if (visited[u] == 0) {
             DFS_visit(u, n, graph, visited, parent, time);
         }
     }
 
-    // 构建DFS?的?接表表示
     unordered_map<int, vector<int>> adj_list;
     build_adjacency_list(n, parent, adj_list);
 
-    // ?出DFS?的?接表表示
-    print_adjacency_list(adj_list, "DFS");
+    // Check for unvisited nodes and add them to adjacency list
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            adj_list[u]; // Add unvisited node to adjacency list
+        }
+    }
+
+    // Print adjacency list
+    cout << "DFS Tree (串列表示):" << endl;
+    for (int u = 0; u < n; u++) {
+        cout << char('A' + u) << "[ ]";
+        if (adj_list.find(u) == adj_list.end()) {
+            cout << "-> no child" << endl;
+        } else {
+            for (int v : adj_list[u]) {
+                cout << "-> " << char('A' + v);
+            }
+            cout << endl;
+        }
+    }
+    cout << endl;
 }
 
 void BFS(int n, int graph[100][100]) {
-    vector<int> parent(n, -1); // ????的父??，初始?-1表示?有父??
+    vector<int> parent(n, -1);
     queue<int> q;
-    vector<int> visited(n, 0); // ????是否被??
+    vector<int> visited(n, 0);
 
-    // ???A?始?行BFS
-    q.push(0); // 根??A入?
-    visited[0] = 1; // ????A已??
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            q.push(u);
+            visited[u] = 1;
 
-    while (!q.empty()) {
-        int u = q.front(); // 取出?首??
-        q.pop();
+            while (!q.empty()) {
+                int v = q.front();
+                q.pop();
 
-        // ????u的所有?居??
-        for (int v = 0; v < n; v++) {
-            if (graph[u][v] == 1 && visited[v] == 0) { // 如果??v是??u的?居且未???
-                visited[v] = 1; // ????v已??
-                parent[v] = u; // ?置??v的父???u
-                q.push(v); // ???v入?
+                for (int w = 0; w < n; w++) {
+                    if (graph[v][w] == 1 && visited[w] == 0) {
+                        visited[w] = 1;
+                        parent[w] = v;
+                        q.push(w);
+                    }
+                }
             }
         }
     }
 
-    // 构建BFS?的?接表表示
     unordered_map<int, vector<int>> adj_list;
     build_adjacency_list(n, parent, adj_list);
 
-    // ?出BFS?的?接表表示
-    print_adjacency_list(adj_list, "BFS");
+    // Check for unvisited nodes and add them to adjacency list
+    for (int u = 0; u < n; u++) {
+        if (visited[u] == 0) {
+            adj_list[u]; // Add unvisited node to adjacency list
+        }
+    }
+
+    // Print adjacency list
+    cout << "BFS Tree (串列表示):" << endl;
+    for (int u = 0; u < n; u++) {
+        cout << char('A' + u) << "[ ]";
+        if (adj_list.find(u) == adj_list.end()) {
+            cout << "-> no child" << endl;
+        } else {
+            for (int v : adj_list[u]) {
+                cout << "-> " << char('A' + v);
+            }
+            cout << endl;
+        }
+    }
+    cout << endl;
 }
+
+
 
 void show_vertex_edges(int n,int graph[100][100]){
     cout<<endl;
@@ -155,7 +190,7 @@ void show_vertex_edges(int n,int graph[100][100]){
                 cout<<char('A'+k)<<endl;
             }
             h=h+1;
-            
+
         }
         k=k+1;
         h=0;
@@ -169,15 +204,12 @@ void show_vertex_edges(int n,int graph[100][100]){
                 cout<<char('A'+h)<<endl;
             }
             h=h+1;
-            
+
         }
         k=k+1;
         h=0;
     }
 }
-
-
-
 
 int main(){
     int n,e;
@@ -185,12 +217,16 @@ int main(){
     cin>>n;
     cout<<"edge數目：";
     cin>>e;
+    if(e>((n*(n-1))/2)){
+    	cout<<"error";
+    	return 0;
+	}
     cout<<endl;
     int graph[100][100];
     make_random_graph(n,e,graph);
     make_adj_list(n,graph);
     DFS(n,graph);
     BFS(n,graph);
-	show_vertex_edges(n,graph);
+    show_vertex_edges(n,graph);
     return 0;
 }
