@@ -145,6 +145,40 @@ void BFS(int n, int graph[100][100]) {
     print_adjacency_list(adj_list, "BFS");
 }
 
+void show_vertex_edges(int n,int graph[100][100]){
+    cout<<endl;
+    int k=0,h=0;
+    char A='A';
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            if(graph[j][i]==1){
+                cout<<char('A'+k)<<endl;
+            }
+            h=h+1;
+            
+        }
+        k=k+1;
+        h=0;
+    }
+    cout<<"------------"<<endl;
+    k=0,h=0;
+    A='A';
+    for(int j=0;j<n;j++){
+        for(int i=0;i<n;i++){
+            if(graph[j][i]==1){
+                cout<<char('A'+h)<<endl;
+            }
+            h=h+1;
+            
+        }
+        k=k+1;
+        h=0;
+    }
+}
+
+
+
+
 int main(){
     int n,e;
     cout<<"vertex數目：";
@@ -157,6 +191,6 @@ int main(){
     make_adj_list(n,graph);
     DFS(n,graph);
     BFS(n,graph);
-
+	show_vertex_edges(n,graph);
     return 0;
 }
