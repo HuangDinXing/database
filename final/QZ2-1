@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    FILE *inputFile, *outputFile;
+    char ch;
+    int count = 0;
+    
+    inputFile = fopen("main2.c", "r");
+    if (inputFile == NULL) {
+        perror("無法開啟輸入檔案");
+        return 1;
+    }
+
+    while ((ch = fgetc(inputFile)) != EOF) {
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            count++;
+        }
+    }
+
+
+    outputFile = fopen("main2.txt", "w");
+    if (outputFile == NULL) {
+        perror("無法開啟輸出檔案");
+        return 1;
+    }
+
+    fprintf(outputFile, "%d", count);
+
+    fclose(inputFile);
+    fclose(outputFile);
+
+    return 0;
+}
