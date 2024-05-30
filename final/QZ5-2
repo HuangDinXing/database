@@ -1,0 +1,23 @@
+#include <iostream>
+
+void overloaded_func(int a) {
+    std::cout << "Integer number = " << a << std::endl;
+}
+
+void overloaded_func(float b) {
+    std::cout << "Float number = " << b << std::endl;
+}
+
+void overloaded_func(int a,float b) {
+    std::cout<<"Integer number = "<<a<<" and "<< "Float number = " << b << std::endl;
+}
+
+int main() {
+    int a;
+    float b;
+    std::cin >> a >> b;
+    overloaded_func(a);
+    overloaded_func(b);
+    overloaded_func(a, b);
+    return 0;
+}
