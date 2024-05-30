@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+int sum_of_digit(int n) {
+    if (n == 0) {
+        return 0; // 終止條件：當 n 為 0 時，返回 0
+    } else {
+        return (n % 10) + sum_of_digit(n / 10); // 遞迴：取得 n 的最後一位數，加上剩餘部分的數字和
+    }
+}
+
+int main() {
+    int num;
+    scanf("%d", &num);
+    int result = sum_of_digit(num);
+    printf("The sum of digits in %d is %d\n", num, result);
+    return 0;
+}
