@@ -1,0 +1,40 @@
+#include <iostream>
+#include <string>
+
+class Clock {
+protected:
+    int hour;
+    int minute;
+    int second;
+    std::string period;
+
+public:
+    Clock(int h, int m, int s, const std::string& p) : hour(h), minute(m), second(s), period(p) {}
+
+    virtual void display() const {
+        std::cout << "Clock = " << hour << ":" << minute << ":" << second << " " << period << std::endl;
+    }
+};
+
+class HMSClock : public Clock {
+public:
+    HMSClock(int h, int m, int s, const std::string& p) : Clock(h, m, s, p) {}
+
+    void display() const override {
+        int totalHours = hour;
+        if (period == "PM") {
+            totalHours += 12;
+        }
+        std::cout << "HMSClock = " << totalHours << "h:" << minute << "m:" << second << "s" << std::endl;
+    }
+};
+
+int main() {
+    Clock cc(10, 25, 43, "AM");
+    HMSClock hmsc(10, 25, 43, "PM");
+
+    cc.display();
+    hmsc.display();
+
+    return 0;
+}
