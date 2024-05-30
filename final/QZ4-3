@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char *clone_string(char *str) {
+    int length = strlen(str);
+    char *new_str = (char *)calloc(length + 1, sizeof(char)); 
+    strcpy(new_str, str); 
+    return new_str;
+}
+void free_string(char *str) {
+    free(str); 
+}
+
+int main() {
+    char str[100];
+	scanf("%99s", str);
+	char *pstr = clone_string(str);
+	printf("The cloned string :%s\n", pstr);
+	free_string(pstr);
+	return 0;
+}
