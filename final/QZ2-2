@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <string.h>
+
+int main(){
+	FILE*inputFILE,*outputFILE;
+	int count=0;
+	char buffer[1000];
+	inputFILE=fopen("main1.c","r");
+	while(fgets(buffer,sizeof(buffer),inputFILE)){
+		count++;
+		if(strstr(buffer,"int main()")){
+			break;
+		}
+	}
+	outputFILE=fopen("main1.txt","w");
+	fprintf(outputFILE,"%d",count);
+	
+	fclose(inputFILE);
+	fclose(outputFILE);
+	
+		
+	return 0;
+
+	}
