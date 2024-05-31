@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int main()
+{   char a[11];
+    int i=0,count=0,arr=0,b=0,c;
+    scanf("%s",a);
+    while(a[i]!='\0'){
+        count++;
+        i++;
+    }
+    for(int k=0;k<count;k++){
+        c=(int)(a[k]-'0');
+        arr=arr*10+c;
+    }
+    arr=arr%7;
+    printf("%d",arr);
+    printf("\n");
+    
+    
+    return 0;
+}
