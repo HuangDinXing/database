@@ -1,19 +1,22 @@
 #include <stdio.h>
 #include <string.h>
+
+// 定義學生結構體
 typedef struct student {
-    int sID;
-    char name[20];
+    int sID;        // 學生ID
+    char name[20];  // 學生姓名
 } student_t;
 
+// 填寫學生資料的函數
 void fillin_students(student_t *p, int id, char *n) {
     p->sID = id;
-    strcpy(p->name,n);
+    strcpy(p->name, n);  // 將名字複製到結構體中
     printf("fillin_students %s success\n", p->name);
 }
 
+// 搜尋包含指定字符串的學生
 void search_students(student_t *p, char *s, int n) {
-    int i;
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         if (strstr(p[i].name, s) != NULL) {
             printf("FIND %d %s\n", p[i].sID, p[i].name);
         }
@@ -22,9 +25,14 @@ void search_students(student_t *p, char *s, int n) {
 
 int main() {
     student_t list[3];
+
+    // 填寫三個學生的資料
     fillin_students(&list[0], 1, "IU Lee");
     fillin_students(&list[1], 2, "IUU");
     fillin_students(&list[2], 3, "Lee");
-    search_students(list, "IU", 3); 
+
+    // 搜尋名字中包含"IU"的學生
+    search_students(list, "IU", 3);
+
     return 0;
 }
