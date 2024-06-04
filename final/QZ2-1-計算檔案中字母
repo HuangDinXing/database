@@ -7,6 +7,7 @@ int main() {
     int count = 0;
     
     inputFile = fopen("main2.c", "r");
+    outputFile = fopen("output.txt", "w");
 
     while ((ch = fgetc(inputFile)) != EOF) {
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
