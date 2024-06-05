@@ -1,31 +1,33 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 class Clock {
 protected:
     int hour;
     int minute;
     int second;
-    std::string period;
+    string period;
 
 public:
-    Clock(int h, int m, int s, const std::string& p) : hour(h), minute(m), second(s), period(p) {}
+    Clock(int h, int m, int s, const string& p) : hour(h), minute(m), second(s), period(p) {}
 
     virtual void display() const {
-        std::cout << "Clock = " << hour << ":" << minute << ":" << second << " " << period << std::endl;
+        cout << "Clock = " << hour << ":" << minute << ":" << second << " " << period << endl;
     }
 };
 
 class HMSClock : public Clock {
 public:
-    HMSClock(int h, int m, int s, const std::string& p) : Clock(h, m, s, p) {}
+    HMSClock(int h, int m, int s, const string& p) : Clock(h, m, s, p) {}
 
     void display() const override {
         int totalHours = hour;
         if (period == "PM") {
             totalHours += 12;
         }
-        std::cout << "HMSClock = " << totalHours << "h:" << minute << "m:" << second << "s" << std::endl;
+        cout << "HMSClock = " << totalHours << "h:" << minute << "m:" << second << "s" << endl;
     }
 };
 
