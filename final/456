@@ -1,0 +1,252 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <regex>
+#include <filesystem>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#pragma comment(lib, "ws2_32.lib")
+
+using namespace std; // 使用 namespace std
+
+class WebDownloader {
+private:
+    string url;
+    string outputDir;
+    string host;
+    string path;
+    int port = 80;
+    int imgnum = 0;
+
+    bool parseURL(const string& inputUrl) {
+        regex url_regex(R"(^(https?://)?([^/]+)(/.*)?$)");
+        smatch match;
+
+        if (!regex_match(inputUrl, match, url_regex)) {
+            cerr << "Invalid URL format: " << inputUrl << endl;
+            return false;
+        }
+
+        host = match[2];
+        path = match[3].str().empty() ? "/" : match[3].str();
+
+        size_t colon_pos = host.find(':');
+        if (colon_pos != string::npos) {
+            try {
+                port = stoi(host.substr(colon_pos + 1));
+                host = host.substr(0, colon_pos);
+            } catch (...) {
+                cerr << "Invalid port number" << endl;
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool checkOutputDirectory() {
+        try {
+            filesystem::create_directories(outputDir);
+            if (!filesystem::exists(outputDir) || !filesystem::is_directory(outputDir)) {
+                cerr << "Cannot write to output directory: " << outputDir << endl;
+                return false;
+            }
+        } catch (const filesystem::filesystem_error& e) {
+            cerr << "Directory error: " << e.what() << endl;
+            return false;
+        }
+        return true;
+    }
+
+    void saveToFile(const string& filePath, const char* data, size_t size) {
+        ofstream outFile(filePath, ios::binary);
+        if (outFile) {
+            const char bom[] = { (char)0xEF, (char)0xBB, (char)0xBF };
+            outFile.write(bom, sizeof(bom));
+            outFile.write(data, size);
+            outFile.close();
+            cout << "Saved: " << filePath << endl;
+        } else {
+            cerr << "Failed to save file: " << filePath << endl;
+        }
+    }
+
+    void Download_Image(const string& imageUrl) {
+        cout << "Downloading image: " << imageUrl << endl;
+
+        size_t begin = imageUrl.find("//") + 2;
+        size_t end = imageUrl.find('/', begin);
+        string hostname = imageUrl.substr(begin, end - begin);
+        string pagepath = imageUrl.substr(end);
+
+        WSADATA wsaData;
+        WSAStartup(MAKEWORD(2, 2), &wsaData);
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+        struct hostent* host = gethostbyname(hostname.c_str());
+        sockaddr_in sa = { AF_INET };
+        sa.sin_port = htons(80);
+        memcpy(&sa.sin_addr, host->h_addr, 4);
+
+        connect(sock, (sockaddr*)&sa, sizeof(sa));
+        string reqInfo = "GET " + pagepath + " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection:Close\r\n\r\n";
+        send(sock, reqInfo.c_str(), reqInfo.size(), 0);
+
+        string photoname = outputDir + "/" + to_string(imgnum++) + ".jpg";
+        char buffer[8192];
+        int bytesReceived;
+
+        ofstream file(photoname, ios::binary);
+        bool isHeaderParsed = false;
+        while ((bytesReceived = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
+            if (!isHeaderParsed) {
+                char* bodyStart = strstr(buffer, "\r\n\r\n");
+                if (bodyStart) {
+                    size_t headerSize = bodyStart - buffer + 4;
+                    file.write(bodyStart + 4, bytesReceived - headerSize);
+                    isHeaderParsed = true;
+                }
+            } else {
+                file.write(buffer, bytesReceived);
+            }
+        }
+
+        file.close();
+        closesocket(sock);
+        WSACleanup();
+
+        cout << "Saved: " << photoname << endl;
+    }
+
+    string fetchHTMLContent() {
+        WSADATA wsaData;
+        SOCKET connectSocket = INVALID_SOCKET;
+        struct addrinfo* result = NULL, * ptr = NULL, hints;
+
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            cerr << "WSAStartup failed" << endl;
+            return "";
+        }
+
+        ZeroMemory(&hints, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+
+        if (getaddrinfo(host.c_str(), to_string(port).c_str(), &hints, &result) != 0) {
+            cerr << "Cannot resolve host" << endl;
+            WSACleanup();
+            return "";
+        }
+
+        for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+            connectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+            if (connectSocket == INVALID_SOCKET) continue;
+
+            if (connect(connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen) == SOCKET_ERROR) {
+                closesocket(connectSocket);
+                connectSocket = INVALID_SOCKET;
+                continue;
+            }
+            break;
+        }
+
+        freeaddrinfo(result);
+
+        if (connectSocket == INVALID_SOCKET) {
+            cerr << "Could not connect to server" << endl;
+            WSACleanup();
+            return "";
+        }
+
+        string request = "GET " + path + " HTTP/1.1\r\nHost: " + host + "\r\nConnection: close\r\n\r\n";
+        if (send(connectSocket, request.c_str(), request.length(), 0) == SOCKET_ERROR) {
+            cerr << "Send failed" << endl;
+            closesocket(connectSocket);
+            WSACleanup();
+            return "";
+        }
+
+        char recvbuf[4096];
+        int bytesReceived;
+        ostringstream response;
+
+        while ((bytesReceived = recv(connectSocket, recvbuf, sizeof(recvbuf), 0)) > 0) {
+            response.write(recvbuf, bytesReceived);
+        }
+
+        closesocket(connectSocket);
+        WSACleanup();
+
+        string content = response.str();
+        size_t bodyPos = content.find("\r\n\r\n");
+        if (bodyPos != string::npos) {
+            return content.substr(bodyPos + 4);
+        }
+
+        return "";
+    }
+
+    void extractResourcesAndSaveHTML(string& content) {
+        regex img_regex(R"(src\s*=\s*["']([^"']+\.(jpg|jpeg|png|gif|bmp))["'])");
+        sregex_iterator it(content.begin(), content.end(), img_regex);
+        sregex_iterator end;
+
+        while (it != end) {
+            string imageUrl = (*it)[1].str();
+
+            if (imageUrl.substr(0, 4) != "http") {
+                if (imageUrl[0] == '/') {
+                    imageUrl = "http://" + host + imageUrl;
+                } else {
+                    imageUrl = "http://" + host + path.substr(0, path.find_last_of('/') + 1) + imageUrl;
+                }
+            }
+
+            Download_Image(imageUrl);
+            ++it;
+        }
+
+        string htmlPath = outputDir + "/index.html";
+        saveToFile(htmlPath, content.c_str(), content.size());
+    }
+
+public:
+    void downloadInteractively() {
+        cout << "Enter your URL: ";
+        getline(cin, url);
+
+        cout << "Enter output directory (if the directory doesn't exist, it will create a new one): ";
+        getline(cin, outputDir);
+        if (outputDir.empty()) {
+            outputDir = "output";
+        }
+
+        if (!parseURL(url) || !checkOutputDirectory()) {
+            cerr << "Setup failed! Please check the URL and output directory." << endl;
+            cout << "Press any key to exit..." << endl;
+            system("pause"); // 等待用戶按鍵
+            return;
+        }
+
+        string content = fetchHTMLContent();
+        if (!content.empty()) {
+            extractResourcesAndSaveHTML(content);
+            cout << "Download completed successfully!" << endl;
+        } else {
+            cerr << "Failed to fetch HTML content!" << endl;
+        }
+
+        cout << "Press any key to exit..." << endl;
+        system("pause"); // 等待用戶按鍵
+    }
+};
+
+int main() {
+    WebDownloader downloader;
+    downloader.downloadInteractively();
+    return 0;
+}
