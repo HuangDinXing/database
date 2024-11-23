@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <iconv.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -65,7 +66,6 @@ private:
             // 寫入 UTF-8 BOM
             const char bom[] = { (char)0xEF, (char)0xBB, (char)0xBF };
             outFile.write(bom, sizeof(bom));
-            
             // 寫入內容
             outFile.write(data, size);
             outFile.close();
@@ -120,6 +120,32 @@ private:
         WSACleanup();
 
         std::cout << "Saved: " << photoname << std::endl;
+    }
+
+    std::string convertEncoding(const std::string& input, const std::string& fromCode, const std::string& toCode) {
+        iconv_t cd = iconv_open(toCode.c_str(), fromCode.c_str());
+        if (cd == (iconv_t)-1) {
+            std::cerr << "iconv_open failed" << std::endl;
+            return "";
+        }
+
+        size_t inBytesLeft = input.size();
+        size_t outBytesLeft = inBytesLeft * 4; // 預留足夠的空間
+        char* inBuf = const_cast<char*>(input.data());
+        std::vector<char> output(outBytesLeft);
+        char* outBuf = output.data();
+
+        char* inPtr = inBuf;
+        char* outPtr = outBuf;
+
+        if (iconv(cd, &inPtr, &inBytesLeft, &outPtr, &outBytesLeft) == (size_t)-1) {
+            std::cerr << "iconv failed" << std::endl;
+            iconv_close(cd);
+            return "";
+        }
+
+        iconv_close(cd);
+        return std::string(output.data(), outPtr - outBuf);
     }
 
     std::string fetchHTMLContent() {
@@ -185,7 +211,8 @@ private:
         std::string content = response.str();
         size_t bodyPos = content.find("\r\n\r\n");
         if (bodyPos != std::string::npos) {
-            return content.substr(bodyPos + 4);
+            std::string body = content.substr(bodyPos + 4);
+            return convertEncoding(body, "BIG5", "UTF-8"); // 轉換編碼
         }
 
         return "";
@@ -207,10 +234,7 @@ private:
                 }
             }
 
-            std::string localPath = std::to_string(imgnum) + ".jpg";
             Download_Image(imageUrl);
-
-            content.replace(it->position(1), it->length(1), localPath);
             ++it;
         }
 
