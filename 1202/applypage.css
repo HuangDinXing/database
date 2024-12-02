@@ -1,0 +1,430 @@
+* {
+  margin: 0; /* 去除所有元素的外邊距 */
+  padding: 0; /* 去除所有元素的內邊距 */
+  box-sizing: border-box; /* 確保內邊距和邊框計入寬度計算 */
+}
+
+.apply-page {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 0px;
+  margin-top: -30px; /* 將整個行向上移動 30 像素 */
+  margin-left: 80px;
+
+}
+
+.logo {
+  width: 120px;
+  height: 30px;
+  margin-right: 50px;
+}
+
+.apply-button {
+  background-color: #fdebf2;
+  color: rgb(253, 49, 134);
+  font-weight: 500;
+  padding: 12px 17px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left:40rem; /* 增加左外邊距 */
+}
+.apply-button:hover {
+  background-color: hsla(157, 32%, 77%, 0.411);
+}
+.new-section {
+  margin: 5rem auto 3rem; /* 上下邊距，左右自動以置中 */
+  display: flex;
+  margin-left:300px;
+  flex-direction: column;
+  align-items: center; /* 置中對齊內容 */
+  width: 100%;
+  max-width: 870px; /* 設定最大寬度 */
+  justify-content: flex-start; /* 左對齊 */
+  
+}
+
+.section-title1 {
+  font-size: 1.7rem;
+  font-weight: 500;
+  margin-bottom: 5rem; /* 下 */
+  text-align: left;
+  padding-right: 500px; /* 增加左側內邊距 */
+  margin-right: 60px;
+}
+
+.section-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  
+}
+
+.section-image {
+  max-width: 400px;
+  margin-right: 5rem; /* 右 */
+  border-radius: 20px;
+}
+
+.section-form-container {
+  display: flex;
+  justify-content: center;
+
+  align-items: center;
+  height: 100vh; /* 將容器高度設為視窗高度 */
+}
+
+.section-form123 {
+  background-color: #ff2b85;
+  padding: 3rem; /* 上下左右 */
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 90%; /* 在小螢幕上佔 90% 寬度 */
+  max-width: 600px; /* 在大螢幕上最大寬度為 600px */
+  margin-top: -3rem; /* 將 section-form 往上移動 3rem */
+}
+
+.form-title123 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: rgb(255, 255, 255); /* 字体为白色 */
+  margin-bottom: 1.5rem; /* 下 */
+  text-align: left;
+
+  
+}
+
+.form-group {
+  margin-bottom: 1.5rem; /* 下 */
+  
+}
+
+.form-group label {
+  display: block;
+  font-weight: 400;
+  margin-bottom: 0; /* 下 */
+}
+
+.form-group select {
+  width: 100%; /* 設置寬度為 100% */
+  max-width: 300px; /* 設置最大寬度，如果需要的話 */
+  height: 40px; /* 設置下拉選單的高度 */
+  margin-top: 2rem; /* 將 section-form 往上移動 3rem */
+  padding: 0.45rem; /* 調整上下左右的內邊距 */
+  border: 1px solid #ccc; /* 設置邊框 */
+  
+  font-size: 1rem; /* 調整字體大小 */
+}
+
+.form-group select option[value=""] {
+  color: #adadad; /* 預設選項(value="")字體顏色為灰色 */
+}
+
+.submit-button {
+  background-color: #ffffff;
+  color: #ff2b85;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 3rem; /* 增加上外邊距 */
+  width: 280px; /* 設置按鈕的寬度 */
+  height: 50px; /* 設置按鈕的高度 */
+}
+
+.submit-button:hover {
+  background-color: #ff6b99;
+}
+
+.new-section1 {
+  padding: 30px 0;
+  padding-left: 18rem; /* 增加左內邊距 */
+
+}
+
+.section-text1 {
+  width: 50%;
+  text-align: left;
+  position: relative;
+  font-weight: normal;
+
+  top: 100px; /* 將元素向下移動 20 像素 */
+}
+
+.section-text1 h2 {
+  font-size: 28px;
+  font-weight: normal;
+
+  font-weight: 400;
+  margin-bottom: 10px;
+  line-height: 3;
+}
+
+.section-text1 p {
+  font-size: 20px;
+  line-height: 0;
+  margin-bottom: 24px;
+  font-weight: 200;
+}
+
+.section-image1 {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin-left: 250px; /* 增加文字與圖片之間的間距 */
+  margin-top: -100px; /* 增加文字與圖片之間的間距 */
+  border-radius: 20px;
+}
+
+.section-text2 {
+  width: 50%;
+  text-align: left;
+  position: relative;
+  margin-left: 480px; /* 增加文字與圖片之間的間距 */
+  top: 100px; /* 將元素向下移動 20 像素 */
+
+}
+
+.section-text2 h2 {
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 10px;
+  line-height: 3;
+  
+  
+}
+
+.section-text2 p {
+  font-size: 20px;
+  line-height: 0;
+  margin-bottom: 24px;
+  font-weight: 200;
+}
+
+.section-image2 {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin-right: 900px; /* 增加文字與圖片之間的間距 */
+  margin-top: -100px; /* 增加文字與圖片之間的間距 */
+  border-radius: 20px;
+  margin-right: 700px;
+
+}
+
+.othergood h2 {
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 10px;
+  line-height: 3;
+}
+
+.gooditems {
+  display: flex;
+  justify-content: center; /* 將項目置中 */
+  flex-wrap: wrap; /* 允許換行 */
+  margin: 20px auto; /* 上下邊距，左右自動 */
+  max-width: 1000px; /* 設定最大寬度 */
+  width: 100%; /* 設定寬度為 100% */
+  padding: 0 10px; /* 增加內邊距以避免邊緣緊貼 */
+}
+
+.cash, .firstaidkit, .balloon {
+  border-radius: 8px; /* 圓角 */
+  padding: 15px; /* 內邊距 */
+  text-align: left; /* 文字置中 */
+  width: 30%; /* 每個項目的寬度 */
+  margin: 15px; /* 每個項目的外邊距 */
+}
+
+.cash img, .firstaidkit img, .balloon img {
+  max-width:30%; /* 圖片最大寬度 */
+  height: auto; /* 高度自動 */
+  margin-bottom: -10px ;
+  margin-left: 90px; /* 增加文字與圖片之間的間距 */
+}
+
+.cash-text p, .firstaidkit-text p, .balloon-text p {
+  font-size: 1.4em; /* 文字字體大小 */
+  font-weight:300;
+}
+
+
+
+.applyfoot {
+  background-color: #ff2b85; /* 背景顏色 */
+  padding: 20px 80px; /* 調整內邊距，縮小背景 */
+  padding-right: 100px; /* 調整內邊距，縮小背景 */
+  padding-bottom: 50px; /* 調整內邊距，縮小背景 */
+
+  border-radius: 8px; /* 圓角邊框 */
+  margin-top:9rem; /* 調整上外邊距 */
+  text-align: left; /* 文字置中 */
+  max-width:1000px; /* 設置最大寬度 */
+  max-height:300px; /* 設置最大寬度 */
+  width: 900px;
+
+  margin-left: auto; /* 左側自動外邊距，讓內容居中 */
+  margin-right: auto; /* 右側自動外邊距，讓內容居中 */
+}
+
+.applyfoot h2 {
+  font-size: 1.7rem; /* 標題字體大小 */
+  font-weight: 500; /* 加粗 */
+  margin-bottom: 1rem; /* 下外邊距 */
+  color: #ffffff; /* 標題顏色 */
+}
+
+.applyfoot ul {
+  list-style-type: disc; /* 項目符號 */
+  padding-left: 20px; /* 左側內邊距 */
+  padding-right: 20px; /* 左側內邊距 */
+
+  color: #ffffff; /* 標題顏色 */
+  margin-top: -20px; /* 上外邊距，向上移動列表 */
+
+}
+
+.applyfoot li {
+  margin: -0.8rem 0; /* 上下外邊距 */
+  font-size: 1.1rem; /* 列表字體大小 */
+}
+
+
+
+.deliveryparners {
+  padding: 40px; /* 內邊距 */
+  border-radius: 10px; /* 圓角邊框 */
+  max-width: 900px; /* 最大寬度 */
+  margin: 0 auto; /* 置中 */
+  text-align: center; /* 文字置中 */
+}
+
+.deliveryparners h2 {
+  font-size: 1.6rem; /* 標題字體大小 */
+  margin-bottom: 20px; /* 下外邊距 */
+  font-weight:400;
+
+}
+
+.parners {
+  display: flex; /* 使用彈性布局 */
+  justify-content: space-around; /* 夥伴之間的間距 */
+  flex-wrap: wrap; /* 允許換行 */
+}
+
+.mrslin, .mrlin {
+  border-radius: 8px; /* 圓角邊框 */
+  margin: 10px; /* 外邊距 */
+  padding: 10px; /* 內邊距 */
+  width: calc(30% - 0px); /* 設置寬度並考慮外邊距 */
+  text-align: left; /* 文字靠左 */
+}
+
+.mrslin-text, .mrlin-text {
+  
+  text-align: center; /* 文字置中 */
+}
+
+.mrslinpic, .mrlinpic {
+  width: 30%; /* 圖片寬度100% */
+  height: auto; /* 自動高度 */
+  border-radius: 8px; /* 圓角邊框 */
+  margin-bottom: 15px; /* 下外邊距 */
+  
+}
+
+.mrslin h2, .mrlin h2 {
+  font-size: 1.5rem; /* 標題字體大小 */
+  margin-bottom: 10px; /* 下外邊距 */
+  font-weight:500;
+  margin-top: -15px; /* 下外邊距 */
+
+
+}
+
+.mrslin p, .mrlin p {
+  font-size: 1.1rem; /* 文字字體大小 */
+  line-height: 2 ;/* 行高 */
+  text-align: left; /* 文字置中 */
+  width: 110%; /* 設置段落寬度為100% */
+  margin: 0; /* 去除默認外邊距 */
+  
+}
+
+.footpng {
+  padding: 20px; /* 內邊距 */
+  text-align: center; /* 文字置中 */
+  margin-top: 40px; /* 上外邊距 */
+}
+
+.footpic {
+  width: 100%; /* 圖片寬度100% */
+  max-width: 950px; /* 最大寬度 */
+  height: auto; /* 自動高度 */
+  margin-bottom: 15px; /* 下外邊距 */
+}
+
+.footpng h2 {
+  font-size: 1.2rem; /* 標題字體大小 */
+  margin-top: 1px; /* 上外邊距 */
+  font-weight: 400; /* 字體粗細 */
+}
+
+
+.footerpng {
+  background-color: #ff2b85; /* 背景顏色 */
+
+  display: flex; /* 使用彈性盒子布局 */
+  padding: 20px; /* 內邊距 */
+  min-height: 100%; /* 最小高度，根據需要調整 */
+  height: 100%; /* 設置寬度為90% */
+  margin-left: 120px; /* 上外邊距 */
+  margin-top: 60px; /* 上外邊距 */
+
+
+}
+
+.footerleft {
+  flex: 1; /* 左側區域佔據剩餘空間 */
+  display: flex; /* 使圖片居中 */
+  justify-content: center; /* 水平置中 */
+  align-items: center; /* 垂直置中 */
+  margin-right: 600px; /* 上外邊距 */
+  margin-bottom: 80px; /* 上外邊距 */
+
+}
+
+.footerpic {
+  width: 100%; /* 圖片寬度100% */
+  max-width: 30px; /* 最大寬度，縮小至300px */
+  height: auto; /* 自動高度 */
+  margin-bottom: 15px; /* 下外邊距 */
+}
+
+.footerright {
+  flex: 2; /* 右側區域佔據更多空間 */
+  text-align: left; /* 文字左對齊 */
+  padding-left: 20px; /* 左側內邊距 */
+  
+}
+
+.footerright h2 {
+  font-size: 1.2rem; /* 標題字體大小 */
+  color: #ffffff; /* 標題顏色 */
+  margin-top: 0; /* 上外邊距 */
+  font-weight: 400; /* 字體粗細 */
+  line-height: 2;
+}
+
+.footerright p {
+  font-size: 1rem; /* 段落字體大小 */
+  color: #ffffff; /* 段落顏色 */
+  margin: 5px 0; /* 上下外邊距 */
+  line-height: 2;
+}
