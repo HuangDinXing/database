@@ -1,0 +1,402 @@
+.store-join-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100vw; /* 使寬度沒有邊界 */
+    margin: 0; /* 去掉外邊距 */
+
+}
+
+.store-join-top {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    position: relative; /* 使父元素成為定位參考 */
+    z-index: 1000; /* 提高層級以確保在最上面 */
+    margin-top: 5px; /* 向下移動 20 像素 */
+
+}
+
+
+
+.banner-foodpandalogo img {
+    position: absolute; /* 使用絕對定位 */
+    bottom:55px; /* 從上方移動 20 像素 */
+    left: 140px; /* 從左側移動 30 像素 */
+    
+    height: 33.59px; /* 根據需要調整大小 */
+    width: 184px; /* 設置按鈕的寬度 */
+
+}
+
+
+
+.banner-loginbutton .submit-button {
+    background-color: #ff2b85; /* 登錄按鈕顏色 */
+    color: white;
+    border: none;
+    padding: 5px 10px; /* 縮小內邊距 */
+    width: 59px; /* 設置按鈕的寬度 */
+    height:38px; /* 設置按鈕的高度 */
+    border-radius: 8px;
+    cursor: pointer;
+    position: absolute; /* 使用絕對定位 */
+
+    bottom: 55px; /* 從上方移動 20 像素 */
+    left: 1260px; /* 從左側移動 30 像素 */
+}
+
+
+.banner-global img {
+    height: 35px; /* 根據需要調整大小 */
+    position: absolute; /* 使用絕對定位 */
+    bottom: 55px; /* 從上方移動 20 像素 */
+    right:150px; /* 從左側移動 20 像素 */
+
+    height: 35px; /* 根據需要調整大小 */
+    width: 35px; /* 設置按鈕的寬度 */
+
+}
+
+.fillname {
+    
+    width: 100%;
+    height: 700px; /* 設定元素的高度 */
+    background: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), /* 黑色漸層 */
+        url('../assets/oderman.webp'); /* 設定背景圖片 */
+    background-size: cover; /* 確保背景圖片覆蓋整個區域 */
+    background-position: center; /* 圖片居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* 設置父容器為相對定位 */
+
+    margin-top:-40px; /* 向上移動 50 像素 */
+}
+
+
+.section-title {
+    font-size: 40px; /* 標題字體大小 */
+    color: white;
+    text-align: center; /* 置中對齊 */
+    margin-bottom: 10px; /* 下方間距 */
+    padding: 20px; /* 內邊距 */
+    border-radius: 5px; /* 圓角邊框 */
+    max-width: 450px; /* 最大寬度 */
+    text-align: left ;
+    position: absolute; /* 設置為絕對定位 */
+    top: 80px; /* 調整距離上方的距離 */
+    left: 130px; /* 置中對齊 */
+    line-height: 1.2;
+}
+
+.section-title2 {
+    font-size: 18px; /* 副標題字體大小 */
+    color: white;
+    text-align: center; /* 置中對齊 */
+    margin-bottom: 20px; /* 下方間距 */
+    position: absolute; /* 設置為絕對定位 */
+    top: 220px; /* 調整距離上方的距離 */
+    left: 155px;
+}
+
+.section-form {
+    margin-top: 380px; /* 上方間距 */
+    max-width: 400px; /* 設定表單的最大寬度 */
+
+    margin-right: 840px;
+    background-color: white; /* 背景顏色 */
+    padding: 30px; /* 內邊距 */
+    border-radius: 8px; /* 圓角邊框 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
+
+
+}
+
+.form-title {
+    font-size: 20px; /* 表單標題字體大小 */
+    color: #333; /* 字體顏色 */
+    text-align: left ;
+
+    margin-bottom: 15px; /* 下方間距 */
+}
+
+.section-form div {
+    margin-bottom: 30px; /* 每行間距 */
+    text-align: left; /* 使內容靠左對齊 */
+}
+
+
+
+input[type="text"], select {
+    width: 103%; /* 寬度 100% */
+
+    padding: 10px; /* 內邊距 */
+    border: 1px solid #cccccc00; /* 邊框顏色 */
+    border-radius: 5px; /* 圓角邊框 */
+    font-size: 16px; /* 字體大小 */
+    background-color: #f1f1f1; /* 登錄按鈕顏色 */
+
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #007bff; /* 聚焦時邊框顏色 */
+    outline: none; /* 去掉外框 */
+    
+}
+
+option {
+    font-size: 16px; /* 選項字體大小 */
+}
+
+.flag {
+    display: flex; /* 使用彈性布局 */
+
+    align-items: center; /* 垂直居中對齊 */
+}
+
+.TW_flag {
+    width: 30px; /* 調整國旗的寬度 */
+    height: 20px; /* 設定高度，保持一致 */
+    margin-right: 5px; /* 右側間距 */
+    background-color: #747474; /* 設定國旗的背景顏色 */
+
+}
+
+.phonearea{
+    background-color: #eeeeee; /* 設定電話區域的背景顏色 */
+    padding: 10px; /* 添加內邊距以增強可讀性 */
+    margin-right: 9px; /* 右側間距 */
+    border-radius: 5px; /* 圓角邊框 */
+
+
+}
+
+.phoneArea {
+    display: inline-block; /* 使電話區域與圖片在同一行 */
+    margin-left: 5px; /* 左側間距 */
+}
+
+.start-button {
+    background-color: #ff2b85; /* 按鈕背景顏色 */
+    color: white; /* 字體顏色 */
+    border: none; /* 去掉邊框 */
+    border-radius: 4px; /* 圓角邊框 */
+    padding: 10px 20px; /* 上下和左右內邊距 */
+    font-size: 16px; /* 字體大小 */
+    transition: background-color 0.3s; /* 背景顏色過渡效果 */
+    width: 350px; /* 調整國旗的寬度 */
+    height: 55px; /* 設定高度，保持一致 */
+
+
+}
+
+
+.color1 {
+    color: #ff2b85; /* 第一個字的顏色 */
+}
+
+.makechance {
+    text-align: center; /* 置中對齊 */
+    margin: 20px; /* 外邊距 */
+    margin-top: 180px; /* 標題下方的外邊距 */
+
+}
+
+.makechance h2 {
+    font-size:35px; /* 標題字體大小 */
+    margin-bottom: 20px; /* 標題下方的外邊距 */
+    font-weight: 500;
+}
+
+
+.chanceitem {
+    display: flex; /* 使用彈性盒模型 */
+    justify-content: space-around; /* 子項目之間的間距 */
+    flex-wrap: wrap; /* 當空間不足時換行 */
+}
+
+.chanceitem > div {
+    padding: 20px; /* 內邊距 */
+    margin: 50px; /* 外邊距 */
+    width: 30%; /* 每個項目的寬度 */
+    max-width: 300px; /* 最大寬度 */
+    transition: transform 0.2s; /* 變換的過渡效果 */
+}
+
+
+.food-text, .panda-text, .cake-text {
+    text-align: center; /* 文字置中 */
+}
+
+.food, .panda, .cake {
+    width: 50%; /* 圖片寬度 */
+    height: auto; /* 自動高度 */
+    border-radius: 4px; /* 圓角圖片 */
+}
+
+
+
+.newcontact h2 {
+    font-size: 20px; /* 調整標題字體大小 */
+}
+  
+.newcontact p {
+    font-size: 16px; /* 調整段落字體大小 */
+}
+
+.increaseincome h2 {
+    font-size: 20px; /* 調整標題字體大小 */
+}
+  
+.increaseincome p {
+    font-size: 16px; /* 調整段落字體大小 */
+}
+  
+.focusonu h2 {
+    font-size: 20px; /* 調整標題字體大小 */
+}
+  
+.focusonu p {
+    font-size: 16px; /* 調整段落字體大小 */
+}  
+
+.store-join-video {
+    background-color: #ff2b85; /* 紅色背景 */
+    height: 70vh; /* 設置高度為視窗高度 */
+    width: 210vh; /* 設置高度為視窗高度 */
+    position: relative; /* 設置相對定位 */
+    top: 50px; /* 向下移動 50 像素 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .store-join-video iframe {
+    width: 1300px;
+    margin-bottom: 200px; /* 向下移動 20 像素 */
+    border-radius: 15px; /* 添加圓角，您可以根據需要調整數值 */
+
+    height: 500px;
+    border: 0; /* 移除 iframe 的邊框 */
+  }
+  
+
+
+
+
+
+
+  
+.easy-flow {
+    text-align: center; /* 置中對齊 */
+    margin: 20px; /* 外邊距 */
+    margin-top: 180px; /* 標題下方的外邊距 */
+
+}
+
+.easy-flow h2 {
+    font-size:35px; /* 標題字體大小 */
+    margin-bottom: 20px; /* 標題下方的外邊距 */
+    font-weight: 500;
+}
+
+
+.fourstep {
+    display: flex; /* 使用彈性盒模型 */
+    justify-content: space-around; /* 子項目之間的間距 */
+    flex-wrap: nowrap; /* 當空間不足時換行 */
+    
+}
+
+.fourstep > div {
+    padding: 20px; /* 內邊距 */
+    margin: 10px; /* 外邊距 */
+    width: 25%; /* 每個項目的寬度 */
+    max-width: 300px; /* 最大寬度 */
+    transition: transform 0.2s; /* 變換的過渡效果 */
+    background-color: #f7f7f7; /* 設定電話區域的背景顏色 */
+
+}
+
+
+.fcomsumer-text, .pandacook-text, .bread-text .trapperform-text {
+    text-align: center; /* 文字置中 */
+}
+
+.pandacook, .bread, .trapperform{
+    width: 50%; /* 圖片寬度 */
+    height: auto; /* 自動高度 */
+    border-radius: 8px; /* 圓角圖片 */
+    margin-top: -50px; /* 上移圖片 */
+
+}
+.cellphone{
+    width: 50%; /* 圖片寬度 */
+    height: auto; /* 自動高度 */
+    border-radius: 8px; /* 圓角圖片 */
+    margin-top: -50px; /* 上移圖片 */
+
+}
+
+.comsumer h2, .pandacook h2, .bread h2, .trapperform h2 {
+    font-size: 20px; /* 調整標題字體大小 */
+}
+
+.comsumer p, .pandacook p, .bread p, .trapperform p {
+    font-size: 16px; /* 調整段落字體大小 */
+}
+
+.fourblock {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100vh; /* 使容器充滿視口高度 */
+
+}
+
+.quadrant {
+    flex: 1 0 50%; /* 每個部分佔據一半的寬度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    box-sizing: border-box;
+}
+
+.top-left, .top-right {
+    height: 50%; /* 每個部分佔據一半的高度 */
+}
+
+.pandabag, .holdburger {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover; /* 確保圖片不失真 */
+    width: 800px; /* 也可以換成任何你想要的寬度 */
+
+}
+
+.bottom-left, .bottom-right {
+    text-align: center; /* 文字居中 */
+    background-color: #ff2b85; /* 設定電話區域的背景顏色 */
+    color: white; /* 字體顏色 */
+    height: 50%; /* 使文字框高度與圖片一致 */
+    padding: 90px; /* 增加內邊距 */
+}
+.bottom-left h2, .bottom-right h2{
+    font-size: 30px;
+
+}
+.author {
+    font-weight: bold; /* 加粗作者名 */
+    color: white; /* 字體顏色 */
+
+}
+
+.business {
+    color: gray; /* 商家名使用灰色 */
+    
+}
+
+
