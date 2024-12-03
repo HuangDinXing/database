@@ -1,0 +1,219 @@
+py.
+  from flask import Flask, request, jsonify
+import pymysql
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # 允许所有来源的跨域请求
+
+class MySQLDatabase:
+    def __init__(self, host, user, password, database):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+        self.connection = None
+
+    def connect(self):
+        self.connection = pymysql.connect(host=self.host,
+                                          user=self.user,
+                                          password=self.password,
+                                          database=self.database,
+                                          charset='utf8mb4',
+                                          cursorclass=pymysql.cursors.DictCursor,
+                                          autocommit=True)
+
+    def disconnect(self):
+        if self.connection:
+            self.connection.close()
+
+    def execute_update(self, query, params=None):
+        if not self.connection:
+            self.connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, params)
+            self.connection.commit()
+
+# 配置数据库连接
+db = MySQLDatabase(host='127.0.0.1', user='root', password='12345678', database='kungfupanda')
+
+@app.route('/submit', methods=['POST'])
+def submit_data():
+    try:
+        data = request.json
+        # 检查必要字段
+        required_fields = [ 'deliveryManFirstName', 'deliveryManLastName', 'deliveryManPhoneNumber', 'deliveryManMail', 'deliveryManIDCard', 'cityID','18years','transportation']
+        missing_fields = [field for field in required_fields if field not in data or not data[field]]
+        if missing_fields:
+            return jsonify({'error': f'Missing fields: {", ".join(missing_fields)}'}), 400
+        
+        # 插入数据到数据库
+        query = """
+            INSERT INTO deliveryman 
+            (deliveryManFirstName, deliveryManLastName, deliveryManPhoneNumber, 
+             deliveryManMail, deliveryManIDCard, cityID, 18years, transportation) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        params = (
+            data['deliveryManFirstName'], 
+            data['deliveryManLastName'], 
+            data['deliveryManPhoneNumber'], 
+            data['deliveryManMail'], 
+            data['deliveryManIDCard'], 
+            data['cityID'], 
+            data['18years'], 
+            data['transportation'], 
+
+        )
+        db.execute_update(query, params)
+        return jsonify({'message': '資料提交成功！'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=False)
+
+
+
+
+
+js.
+return (
+    <div>
+      <div className="apply-page">
+        <img src={foodpandaLogo} alt="Food Panda Logo" className="logo" />
+        <button className="apply-button">ZH</button>
+      </div>
+
+      <div className="new-section">
+        <div className="section-title1">與foodpanda合作外送</div>
+        <div className="section-content">
+          <img src={foodpandaad} alt="foodpandaad" className="section-image" />
+          <form className="section-form123" onSubmit={handleSubmit}>
+            <h2 className="form-title123">填寫您的個人資訊</h2>
+            <div className="form-group">
+              <select id="cityID" name="city" onChange={handleCityChange}>
+                <option value="">選擇您的城市</option>
+                <option value="E01">台北市</option>
+                <option value="E02">新北市</option>
+                <option value="E03">桃園市</option>
+                <option value="E07">台中市</option>
+                <option value="E13">台南市</option>
+                <option value="E14">高雄市</option>
+                <option value="Keelung City">基隆市</option>
+                <option value="E04">新竹市</option>
+                <option value="E11">嘉義市</option>
+                <option value="E05">新竹縣</option>
+                <option value="E06">苗栗縣</option>
+                <option value="E08">彰化縣</option>
+                <option value="E09">南投縣</option>
+                <option value="E10">雲林縣</option>
+                <option value="E12">嘉義縣</option>
+                <option value="E15">屏東縣</option>
+                <option value="E16">宜蘭縣</option>
+                <option value="E17">花蓮縣</option>
+                <option value="E18">台東縣</option>
+                <option value="E19">澎湖縣</option>
+                <option value="E20">金門縣</option>
+                <option value="E21">連江縣</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <select id="transportation" name="transport" onChange={handleTransportChange}>
+                <option value="">選擇您的交通工具</option>
+                <option value="motorcycle">機車</option>
+                <option value="electric motorcycle">電動機車</option>
+              </select>
+            </div>
+
+            {showAdditionalFields && (
+              <div className="additional-fields">
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="deliveryManFirstName"
+                    placeholder="姓氏"
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="deliveryManLastName"
+                    placeholder="名字"
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="deliveryManPhoneNumber"
+                    placeholder="手機號碼"
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="deliveryManMail"
+                    placeholder="信箱"
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="deliveryManIDCard"
+                    placeholder="身分證字號"
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="form-group-age">
+              <label>您是否已年滿 18 歲？</label>
+              <div className="age-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="18years"
+                    value="1"
+                    onChange={handleInputChange}
+                    required
+                  />
+                  是
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="18years"
+                    value="0"
+                    onChange={handleInputChange}
+                    required
+                  />
+                  否
+                </label>
+              </div>
+            </div>
+            <div className="form-group-agree">
+              <div className="agree-options">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="privacyPolicy"
+                    onChange={(e) => setFormData({ ...formData, privacyPolicy: e.target.checked })}
+                    required
+                  />
+                  我同意以上隱私權政策，並同意foodpanda針對個人資料的蒐集、處理和使用我所提供資訊。我已閱讀並理解隱私權政策
+                </label>
+              </div>
+            </div>
+            <button type="submit" className="submit-button">
+              <p>提交</p>
+            </button>
+          </form>
+        </div>
+      </div>
