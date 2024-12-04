@@ -1,0 +1,5 @@
+g++ -o 1104test test.cpp -lws2_32 編譯
+
+1104test.exe "http://hsccl.us.to/index.htm" "C:\now" 命令列模式
+
+http://hsccl.us.to/index.htm 測試網址
