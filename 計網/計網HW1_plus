@@ -1,0 +1,322 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <regex>
+#include <filesystem>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <chrono>
+#pragma comment(lib, "ws2_32.lib")
+
+using namespace std;
+
+class WebDownloader {
+private:
+    string url; // 要下載的 URL
+    string outputDir; // 輸出目錄
+    string host; // 主機名稱
+    string path; // 路徑
+    int port = 80; // 預設端口
+    int imgnum = 0; // 圖片計數器
+    int totalFilesDownloaded = 0; // 紀錄下載的檔案數量
+    size_t totalBytesDownloaded = 0; // 紀錄下載的總容量
+    std::chrono::steady_clock::time_point startTime; // 紀錄開始時間
+
+public:
+    // 設定 URL
+    void setUrl(const string& newUrl) {
+        url = newUrl;
+    }
+        // 獲取 URL
+    string getUrl() const {
+        return url;
+    }
+
+    // 獲取輸出目錄
+    string getOutputDir() const {
+        return outputDir;
+    }
+
+    // 設定輸出目錄
+    void setOutputDir(const string& newOutputDir) {
+        outputDir = newOutputDir;
+    }
+    WebDownloader() : startTime(std::chrono::steady_clock::now()) {} // 初始化 startTime
+
+    bool catchpath(const string& inputUrl) {
+        regex url_regex(R"(^(https?://)?([^/]+)(/.*)?$)"); // URL 正則表達式
+        smatch match;
+
+        if (!regex_match(inputUrl, match, url_regex)) {
+            cerr << "Invalid URL format: " << inputUrl << endl; // 無效的 URL 格式
+            return false;
+        }
+
+        host = match[2];
+        path = match[3].str().empty() ? "/" : match[3].str(); // 提取路徑
+
+        size_t colon_pos = host.find(':'); // 查找端口號
+        if (colon_pos != string::npos) {
+            try {
+                port = stoi(host.substr(colon_pos + 1)); // 解析端口號
+                host = host.substr(0, colon_pos); // 更新主機名稱
+            } catch (...) {
+                cerr << "Invalid port number" << endl; // 無效的端口號
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+   bool checkoutputplace() {
+    try {
+        // 使用 filesystem::path 來處理路徑
+        std::filesystem::path outputPath(outputDir);
+        std::filesystem::create_directories(outputPath); // 創建目錄
+        
+        if (!std::filesystem::exists(outputPath) || !std::filesystem::is_directory(outputPath)) {
+            cerr << "Cannot write to output directory" << endl; // 無法寫入目錄
+            return false;
+        }
+    } catch (const std::filesystem::filesystem_error& e) {
+        cerr << "Directory error: " << e.what() << endl; // 目錄錯誤
+        return false;
+    }
+    return true;
+}
+
+    void savefile(const string& filePath, const char* data, size_t size) {
+        ofstream outFile(filePath, ios::binary); // 以二進位模式打開檔案
+        if (outFile) {
+            const char bom[] = { (char)0xEF, (char)0xBB, (char)0xBF }; // 寫入 UTF-8 BOM
+            outFile.write(bom, sizeof(bom));
+            outFile.write(data, size); // 寫入資料
+            outFile.close();
+            cout << "Saved: " << filePath << endl; // 顯示已保存的檔案路徑
+        } else {
+            cerr << "Failed to save file: " << filePath << endl; // 儲存檔案失敗
+        }
+    }
+
+    void downloadimage(const string& imageUrl) {
+        cout << "Downloading image: " << imageUrl << endl;
+
+        size_t begin = imageUrl.find("//") + 2; // 獲取主機名的開始位置
+        size_t end = imageUrl.find('/', begin); // 獲取路徑的結束位置
+        string hostname = imageUrl.substr(begin, end - begin); // 提取主機名
+        string pagepath = imageUrl.substr(end); // 提取頁面路徑
+
+        WSADATA wsaData;
+        WSAStartup(MAKEWORD(2, 2), &wsaData); // 初始化 Winsock
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // 創建 socket
+
+        struct hostent* host = gethostbyname(hostname.c_str()); // 獲取主機資訊
+        sockaddr_in sa = { AF_INET };
+        sa.sin_port = htons(80); // 設置端口
+        memcpy(&sa.sin_addr, host->h_addr, 4); // 複製主機地址
+
+        connect(sock, (sockaddr*)&sa, sizeof(sa)); // 連接到伺服器
+        string reqInfo = "GET " + pagepath + " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: Close\r\n\r\n"; // HTTP 請求
+        send(sock, reqInfo.c_str(), reqInfo.size(), 0); // 發送請求
+
+        string photoname = outputDir + "/" + to_string(imgnum++) + ".jpg"; // 設定圖片檔名
+        char buffer[8192];
+        int bytesReceived;
+
+        ofstream file(photoname, ios::binary); // 以二進位模式打開檔案
+        bool isHeaderParsed = false; // 標頭是否已解析
+        while ((bytesReceived = recv(sock, buffer, sizeof(buffer), 0)) > 0) { // 接收資料
+            if (!isHeaderParsed) {
+                char* bodyStart = strstr(buffer, "\r\n\r\n"); // 查找資料開始位置
+                if (bodyStart) {
+                    size_t headerSize = bodyStart - buffer + 4; // 計算標頭大小
+                    file.write(bodyStart + 4, bytesReceived - headerSize);  // 計算圖片大小
+                    isHeaderParsed = true;
+                }
+            } else {
+                file.write(buffer, bytesReceived); // 寫入資料
+            }
+        }
+
+        file.close();
+        closesocket(sock);
+        WSACleanup();
+
+        totalFilesDownloaded++; // 更新下載的檔案數量
+        totalBytesDownloaded += filesystem::file_size(photoname); // 更新下載的總容量
+
+        cout << "Saved: " << photoname << endl;
+    }
+
+    // 獲取 HTML 內容
+    string catchhtml() {
+        WSADATA wsaData;
+        SOCKET connectSocket = INVALID_SOCKET;
+        struct addrinfo* result = NULL, * ptr = NULL, hints;
+
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            cerr << "WSAStartup failed" << endl; // Winsock 初始化失敗
+            return "";
+        }
+
+        ZeroMemory(&hints, sizeof(hints)); // 清空 hints 結構
+        hints.ai_family = AF_UNSPEC; // 支持 IPv4 和 IPv6
+        hints.ai_socktype = SOCK_STREAM; // TCP socket
+        hints.ai_protocol = IPPROTO_TCP; // TCP 協議
+
+        if (getaddrinfo(host.c_str(), to_string(port).c_str(), &hints, &result) != 0) {
+            cerr << "Cannot resolve host" << endl; // 無法解析主機
+            WSACleanup();
+            return "";
+        }
+
+        for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+            connectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol); // 創建 socket
+            if (connectSocket == INVALID_SOCKET) continue;
+
+            if (connect(connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen) == SOCKET_ERROR) { // 嘗試連接
+                closesocket(connectSocket);
+                connectSocket = INVALID_SOCKET;
+                continue;
+            }
+            break;
+        }
+
+        freeaddrinfo(result); // 釋放 addrinfo 結構
+
+        if (connectSocket == INVALID_SOCKET) {
+            cerr << "Could not connect to server" << endl; // 無法連接伺服器
+            WSACleanup();
+            return "";
+        }
+
+        string request = "GET " + path + " HTTP/1.1\r\nHost: " + host + "\r\nConnection: close\r\n\r\n";
+        if (send(connectSocket, request.c_str(), request.length(), 0) == SOCKET_ERROR) {
+            cerr << "Send failed" << endl; // 發送請求失敗
+            closesocket(connectSocket);
+            WSACleanup();
+            return "";
+        }
+
+        char recvbuf[4096];
+        int bytesReceived;
+        ostringstream response;
+
+        while ((bytesReceived = recv(connectSocket, recvbuf, sizeof(recvbuf), 0)) > 0) { // 接收資料
+            response.write(recvbuf, bytesReceived); // 寫入響應
+        }
+
+        closesocket(connectSocket); // 關閉 socket
+        WSACleanup(); // 清理 Winsock
+
+        string content = response.str(); // 獲取響應內容
+        size_t bodyPos = content.find("\r\n\r\n"); // 查找資料開始位置
+        if (bodyPos != string::npos) {
+            return content.substr(bodyPos + 4); // 返回資料部分
+        }
+
+        return "";
+    }
+
+    void extractsrcandsavehtml(string& content) {
+        regex img_regex(R"(src\s*=\s*["']([^"']+\.(jpg|jpeg|png|gif|bmp))["'])"); // 圖片的正則表達式
+        sregex_iterator it(content.begin(), content.end(), img_regex);
+        sregex_iterator end;
+
+        while (it != end) {
+            string imageUrl = (*it)[1].str(); // 提取圖片 URL
+
+            // 如果圖片 URL 不是完整的，則補全
+            if (imageUrl.substr(0, 4) != "http") {
+                if (imageUrl[0] == '/') {
+                    imageUrl = "http://" + host + imageUrl; // 以主機名補全
+                } else {
+                    imageUrl = "http://" + host + path.substr(0, path.find_last_of('/') + 1) + imageUrl; // 以路徑補全
+                }
+            }
+
+            downloadimage(imageUrl); // 下載圖片
+            content.replace(it->position(1), it->length(1), to_string(imgnum - 1) + ".jpg"); // 更新 HTML 中的圖片路徑
+            ++it; // 移動到下一個匹配
+        }
+
+        string htmlPath = outputDir + "/index.html"; // 設定 HTML 檔案路徑
+        savefile(htmlPath, content.c_str(), content.size()); // 保存 HTML 檔案
+    }
+
+    void dispalystatistics() {
+        auto endTime = chrono::steady_clock::now();
+        auto duration = chrono::duration_cast<chrono::seconds>(endTime - startTime).count();
+
+        cout << "\nDownload completed successfully!" << endl;
+        cout << "Total files downloaded: " << totalFilesDownloaded << endl; // 下載的檔案數量
+        cout << "Total bytes downloaded: " << totalBytesDownloaded << " bytes" << endl; // 總下載容量
+        cout << "Total download time: " << duration << " seconds" << endl; // 下載時間
+    }
+
+    void downloadInteractively() {
+        cout << "Enter URL to download: ";
+        getline(cin, url); // 獲取使用者輸入的 URL
+
+        cout << "Enter output directory (press Enter for default 'output'): ";
+        getline(cin, outputDir); // 獲取輸出目錄
+        if (outputDir.empty()) {
+            outputDir = "output"; // 如果未指定，使用預設目錄
+        }
+
+        if (!catchpath(url) || !checkoutputplace()) {
+            cerr << "Setup failed!" << endl;
+            return;
+        }
+
+        string content = catchhtml();
+        if (!content.empty()) {
+            extractsrcandsavehtml(content); // 更新函式名稱
+            dispalystatistics(); // 顯示統計資訊
+        } else {
+            cerr << "Failed to fetch HTML content!" << endl;
+        }
+
+        cout << "Press any key to exit..." << endl;
+        system("pause");
+    }
+
+    void downloadWithArgs(const string& inputUrl, const string& outputDirectory) {
+        url = inputUrl;
+        outputDir = outputDirectory;
+
+        if (!catchpath(url) || !checkoutputplace()) {
+            cerr << "Setup failed!" << endl;
+            return;
+        }
+
+        string content = catchhtml();
+        if (!content.empty()) {
+            extractsrcandsavehtml(content);
+            dispalystatistics();
+        } else {
+            cerr << "Failed to fetch HTML content!" << endl;
+        }
+    }
+};
+
+
+
+int main(int argc, char* argv[]) {
+    WebDownloader downloader;
+
+    if (argc == 3) {
+        // 如果提供了 URL 和輸出目錄，則直接下載
+        downloader.downloadWithArgs(argv[1], argv[2]);
+    } else {
+        // 否則進入互動模式
+        downloader.downloadInteractively();
+    }
+
+    return 0;
+}
+
+
