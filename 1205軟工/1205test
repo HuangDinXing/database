@@ -1,0 +1,81 @@
+from flask import Flask, request, jsonify
+import pymysql
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # 允许所有来源的跨域请求
+
+class MySQLDatabase:
+    def __init__(self, host, user, password, database):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+        self.connection = None
+
+    def connect(self):
+        self.connection = pymysql.connect(host=self.host,
+                                          user=self.user,
+                                          password=self.password,
+                                          database=self.database,
+                                          charset='utf8mb4',
+                                          cursorclass=pymysql.cursors.DictCursor,
+                                          autocommit=True)
+
+    def disconnect(self):
+        if self.connection:
+            self.connection.close()
+
+    def execute_query(self, query, params=None):
+        if not self.connection:
+            self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params)
+                return cursor.fetchall()  # 返回所有結果
+        except pymysql.MySQLError as e:
+            print(f"Database error: {e}")
+            return None
+
+    def execute_update(self, query, params=None):
+        if not self.connection:
+            self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params)
+                self.connection.commit()  # 提交更改
+                print(f"Updated {cursor.rowcount} rows.")  # 日誌輸出
+
+        except pymysql.MySQLError as e:
+            print(f"Database error: {e}")
+# 配置数据库连接
+db = MySQLDatabase(host='127.0.0.1', user='root', password='12345678', database='kungfupanda')
+
+@app.route('/get_user/<member_id>', methods=['GET'])
+def get_user(member_id):
+    query = "SELECT userFirstName, userLastName, userPhoneNumber, mail, password FROM member WHERE userID = %s"
+    user_data = db.execute_query(query, (member_id,))
+    
+    if user_data:
+        return jsonify(user_data[0]), 200  # 返回第一筆結果
+        return jsonify(user_data[0]), 200  # 返回第一筆結果
+    else:
+        return jsonify({'error': 'User not found'}), 404
+
+@app.route('/update_password/<member_id>', methods=['POST'])
+def update_password(member_id):
+    data = request.get_json()
+    new_password = data.get('newPassword')
+
+    if not new_password:
+        return jsonify({'error': '新密碼不能為空'}), 400
+
+    # 更新密碼的 SQL 查詢
+    update_query = "UPDATE member SET password = %s WHERE userID = %s"
+    db.execute_update(update_query, (new_password, member_id))
+
+    return jsonify({'message': '密碼已成功更新'}), 200
+
+
+if __name__ == '__main__':
+    app.run(debug=False)
