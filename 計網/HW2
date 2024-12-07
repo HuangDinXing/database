@@ -1,0 +1,423 @@
+g++ -o network_new CN.cpp -lws2_32
+#include <iostream>
+#include <fstream>
+#include <time.h>
+#include <direct.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stack>
+#include <stdlib.h>
+#include <cstdlib>
+#include <stdio.h>
+#include <string> 
+#include <dirent.h>
+
+#include <pthread.h>
+#include <unistd.h>
+
+#include <winsock2.h>
+#include <Windows.h>
+#include <strstream>
+#pragma comment(lib, "ws2_32.lib")
+
+using namespace std;
+int convertStringToInt(const string &s);
+void Download_Image(string imageUrl,string dir);
+int href_number(string a);
+int img_number(string a);
+int url_format(string a);
+string add_http(string array, string hostname);
+string mod_src(string array,string dir);
+string add_hostname_recursive(string array, string hostname);
+int recursive_herf(string array,string target_folder,int idepth);
+int download_html(string address,string target_folder,int idepth);
+
+int imgnum=0;
+int htmnum=0;
+int convertStringToInt(const string &s)
+{
+    int val;
+    std::strstream ss;
+    ss << s;
+    ss >> val;
+    return val;
+}
+
+void Download_Image(string imageUrl,string dir)
+{
+    //char temp[850];  
+    //strcpy(temp, imageUrl.c_str());  //複製字串進入temp
+    size_t begin = imageUrl.find_first_of("/", 0) + 2;
+    size_t end = imageUrl.find_first_of("/", begin + 2);//src=http://hsccl.us.to/images/animals/cats/image.jpg
+
+    string hostname = imageUrl.substr(begin, end - begin);//hostname=hsccl.us.to
+    string pagepath = imageUrl.substr(end, imageUrl.size() - end); //pagepath = /images/animals/cats/image.jpg
+    //初始化 DLL
+    WSADATA wsaData;  
+    WSAStartup(MAKEWORD(2, 2), &wsaData);  
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);  
+    if (sock == INVALID_SOCKET)  
+    {  
+        return;  
+    }  
+    sockaddr_in sa = { AF_INET };  
+    int n = bind(sock, (sockaddr*)&sa, sizeof(sa));  
+    if (n == SOCKET_ERROR)  
+    {  
+        return;  
+    }  
+    
+    struct hostent  *p = gethostbyname(hostname.c_str());  
+    if (p == NULL)  
+    {  
+        return;  
+    }  
+    sa.sin_port = htons(80);  
+    memcpy(&sa.sin_addr, p->h_addr, 4);//   with some problems ???  
+    //sa.sin_addr.S_un.S_addr = inet_addr(*(p->h_addr_list));  
+    //cout << *(p->h_addr_list) << endl;  
+    
+    n = connect(sock, (sockaddr*)&sa, sizeof(sa));  
+    if (n == SOCKET_ERROR)  
+    {  
+        return;  
+    }  
+    
+    string  reqInfo = "GET " +pagepath+ " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection:Close\r\n\r\n";  
+    if (SOCKET_ERROR == send(sock, reqInfo.c_str(), reqInfo.size(), 0))
+    {
+        closesocket(sock);  
+        return;  
+    }  
+
+    std::string photoname = std::to_string(imgnum);
+    imgnum++;
+    photoname=photoname+".jpg";
+    //mkdir("./img");
+    photoname = "./"+dir+"/"+photoname;// + ".jpg";  
+  
+    fstream file;  
+    file.open(photoname, ios::out | ios::binary);  
+    char buf[1024];  
+    memset(buf, 0, sizeof(buf));  
+    n = recv(sock, buf, sizeof(buf)-1, 0);  
+    char *cpos = strstr(buf, "\r\n\r\n");  
+  
+     
+    file.write(cpos + strlen("\r\n\r\n"), n - (cpos - buf) - strlen("\r\n\r\n"));  
+    while ((n = recv(sock, buf, sizeof(buf)-1, 0)) > 0)  
+    {  
+        file.write(buf, n);  
+    }  
+    file.close();  
+    cout<<photoname<<" download finished"<<endl;
+}
+int href_number(string a)
+{
+        // [C_ST42-易] 子字串出現次數
+    string str1="href=\"";
+    //str1出現在a中的次數
+    int fpos = 0, count = 0;
+    while(1)
+    {
+        fpos = a.find(str1,fpos);
+        //在P字串中尋找子字串Q
+        if(fpos != string::npos)
+        {
+            fpos = fpos + 1;
+            count++;
+        }
+        else  //如果找不到就跳出迴圈
+        {
+            break;
+        }
+    }
+    return count;
+}
+int img_number(string a){
+        // [C_ST42-易] 子字串出現次數
+    string str1="src=\"";
+    //str1出現在a中的次數
+    int fpos = 0, count = 0;
+    while(1)
+    {
+        fpos = a.find(str1,fpos);
+        //在P字串中尋找子字串Q
+        if(fpos != string::npos)
+        {
+            fpos = fpos + 1;
+            count++;
+        }
+        else  //如果找不到就跳出迴圈
+        {
+            break;
+        }
+    }
+    return count;
+}
+int url_format(string a){
+        // [C_ST42-易] 子字串出現次數
+    string str1="http://";
+    //str1出現在a中的次數
+    int fpos = 0, count = 0;
+    while(1)
+    {
+        fpos = a.find(str1,fpos);
+        //在P字串中尋找子字串Q
+        if(fpos != string::npos)
+        {
+            fpos = fpos + 1;
+            count++;
+        }
+        else  //如果找不到就跳出迴圈
+        {
+            break;
+        }
+    }
+    return count;
+}
+
+string add_http(string array, string hostname){
+    size_t start=0;
+    int img_count;
+    hostname="http://"+hostname;
+    string hostname_add_line=hostname+"/";
+    img_count=img_number(array);
+    for(int i=0;i<img_count;i++){//有幾張圖片換幾次
+        size_t begin = array.find("src=\"", start) + 5;//"http://hsccl.us.to/images/image.jpg".......
+        size_t end = array.find_first_of("\"", begin );//"http://hsccl.us.to/images/image.jpg"
+        start=end+1;
+        string imgsrc = array.substr(begin, end - begin);//http://hsccl.us.to/images/image.jpg
+        //int轉string
+        string src;
+        //修改成正確src+    hsccl.us.to/    or  hsccl.us.to
+        if(imgsrc[0]=='/')//src=/images/image.jpg
+            src=hostname+imgsrc;
+        else if(imgsrc.find("http://", 0))//src=http://hsccl.us.to/images/image.jpg                    *****************************************************************
+            src=hostname_add_line+imgsrc;
+        else            //src=image.jpg
+            src=imgsrc;
+        string part1 = array.substr(0, begin - 0); //src=""<<前半
+        string part2 = array.substr(end, array.size() - end); //"">>後半
+        array=part1+src+part2;
+    }
+    
+    return array; 
+}
+
+
+string mod_src(string array,string dir){
+    size_t start=0; 
+    int img_count;
+    img_count=img_number(array);
+    for(int i=0;i<img_count;i++){
+        size_t begin = array.find("src=\"", start) + 5;//"http://hsccl.us.to/images/image.jpg".......
+        size_t end = array.find_first_of("\"", begin );//"http://hsccl.us.to/images/image.jpg"
+        start=end+1;
+        string imgsrc = array.substr(begin, end - begin);//http://hsccl.us.to/images/image.jpg
+        Download_Image(imgsrc,dir);
+        //imgnum++;
+        string src = to_string(imgnum-1);
+        src="./"+src+".jpg";
+        string part1 = array.substr(0, begin - 0); //src=""<<前半
+        string part2 = array.substr(end, array.size() - end); //"">>後半
+        array=part1+src+part2;
+    }
+    return array;
+}
+string add_hostname_recursive(string array, string hostname){
+    size_t start=0;
+    int href_count;
+    hostname="http://"+hostname;
+    string hostname_add_line=hostname+"/";
+    href_count=href_number(array);
+    for(int i=0;i<href_count;i++){//有幾href換幾次
+        size_t begin = array.find("href=\"", start) + 6;//"http://hsccl.us.to/images/image.jpg".......
+        size_t end = array.find_first_of("\"", begin );//"http://hsccl.us.to/images/image.jpg"
+        start=end+1;
+        string imgsrc = array.substr(begin, end - begin);//http://hsccl.us.to/images/image.jpg
+        //int轉string
+        string src;
+        //修改成正確src+    hsccl.us.to/    or  hsccl.us.to
+        if(imgsrc[0]=='/')//src=/images/image.jpg
+            src=hostname+imgsrc;
+        else if(imgsrc.find("http://", 0))//src=http://hsccl.us.to/images/image.jpg                    *****************************************************************
+            src=hostname_add_line+imgsrc;
+        else            //src=image.jpg
+            src=imgsrc;
+        string part1 = array.substr(0, begin - 0); //src=""<<前半
+        string part2 = array.substr(end, array.size() - end); //"">>後半
+        array=part1+src+part2;
+    }
+    
+    return array; 
+}
+int recursive_herf(string array,string target_folder,int idepth){
+    
+    if(idepth==-1){
+        return 1;
+    }
+    
+    idepth=idepth-1;
+    size_t start=0;
+    int href_count;
+    href_count=href_number(array);
+    for(int i=0;i<href_count;i++){//有幾href換幾次
+        size_t begin = array.find("href=\"", start) + 6;//"http://hsccl.us.to/images/image.jpg".......
+        size_t end = array.find_first_of("\"", begin );//"http://hsccl.us.to/images/image.jpg"
+        start=end+1;
+        string href = array.substr(begin, end - begin);//http://hsccl.us.to/images/image.jpg
+        //int轉string
+        download_html(href,target_folder,idepth);
+
+        string src = to_string(htmnum-1);
+        src="./index"+src+".html";
+        string part1 = array.substr(0, begin - 0); //src=""<<前半
+        string part2 = array.substr(end, array.size() - end); //"">>後半
+        array=part1+src+part2;
+    }
+    //return array;
+}
+
+
+int download_html(string address,string target_folder,int idepth){
+
+
+
+
+/************************************************************************************************************/
+    size_t begin = address.find_first_of("/", 0) + 2;//把http://隔開
+    size_t end = address.find_first_of("/", begin + 2);//找出主機名稱結尾的位置
+
+    string hostname = address.substr(begin, end - begin);//找出主機名稱hostname=hsccl.us.to
+    string pagepath = address.substr(end, address.size() - end); //找出後面檔案資料位置pagepath = /images/animals/cats/image.jpg
+    string  reqInfo = "GET " +pagepath+ " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection:Close\r\n\r\n";  
+    
+    //初始化 DLL
+    WSADATA wsaData;  
+    WSAStartup(MAKEWORD(2, 2), &wsaData);  
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);  
+    if (sock == INVALID_SOCKET)  
+    {  
+        return 0;  
+    }  
+    sockaddr_in sa = { AF_INET };  
+    int n = bind(sock, (sockaddr*)&sa, sizeof(sa));  
+    if (n == SOCKET_ERROR)  
+    {  
+        return 0;  
+    }  
+    struct hostent  *host = gethostbyname(hostname.c_str());  
+    if (host == NULL)  
+    {  
+        return 0;  
+    }  
+    sa.sin_port = htons(80);  
+    memcpy(&sa.sin_addr, host->h_addr, 4);//   with some problems ???  
+    //sa.sin_addr.S_un.S_addr = inet_addr(*(p->h_addr_list));  
+    //cout << *(p->h_addr_list) << endl;  
+    n = connect(sock, (sockaddr*)&sa, sizeof(sa));  
+    if (n == SOCKET_ERROR)  
+    {  
+        return 0;  
+    }  
+    if (SOCKET_ERROR == send(sock, reqInfo.c_str(), reqInfo.size(), 0))
+    {
+        closesocket(sock);  
+        return 0;  
+    }  
+    char txt[65535]={};
+    recv(sock, txt, sizeof(txt), 0);
+    //cout<<txt;
+    string txt_str=txt;
+    //要去除前面 HTTP/1.1 200 OK Server: ...Accept-Ranges: bytes
+    size_t cut1 = txt_str.find("<!DOCTYPE", 0)-1;//找出bytes稱結尾的位置
+    string htmlcontext = txt_str.substr(cut1, txt_str.size() - cut1);
+    htmlcontext=add_http(htmlcontext,hostname);
+    htmlcontext=mod_src(htmlcontext,target_folder);
+    htmlcontext=add_hostname_recursive(htmlcontext,hostname);
+    recursive_herf(htmlcontext,target_folder,idepth);
+
+
+    char htmlcontext_char[65535];
+    int i;
+    for(i=0;i<htmlcontext.length();i++)
+        htmlcontext_char[i]=htmlcontext[i];
+    htmlcontext_char[i]='\0';
+
+    string htmlname = to_string(htmnum);htmnum++;
+    htmlname="./index"+htmlname+".html";
+
+    //使用者輸入目錄
+    //mkdir("./img");
+    htmlname = "./"+target_folder+"/"+htmlname;
+
+    fstream file;  
+    file.open(htmlname, ios::out | ios::binary);  
+
+    file.write(htmlcontext_char, sizeof(htmlcontext_char));  
+    
+    file.close();  
+    cout<<"index.html download finished\n";    
+
+}
+
+int main(int argc, char *argv[]){
+    string address;
+    string target_folder;
+    string depth;
+    int idepth;
+    if(argv[1]!=NULL&&argv[2]!=NULL&&argv[3]!=NULL){
+        address=argv[1];
+        target_folder=argv[2];
+        depth=argv[3];
+        if(url_format(address)==0){
+            cout<<"url invalid\n";
+            system("pause");
+            exit(0);
+        }
+        if(opendir(target_folder.c_str())==NULL){
+            cout<<"target_folder not found\n";
+            system("pause");
+            exit(0);
+        }
+        idepth = convertStringToInt(depth);
+        if(idepth<0){
+            cout<<"invalid depth value\n";
+            system("pause");
+            exit(0);
+        }
+    }else{
+        cout<<"hello world\n";
+        cout<<"address : ";
+        cin>>address;
+        if(url_format(address)==0){
+            cout<<"url invalid\n";
+            system("pause");
+            exit(0);
+        }
+        cout<<"target_folder : ";
+        cin>>target_folder;
+        if(opendir(target_folder.c_str())==NULL){
+            cout<<"target_folder not found\n";
+            system("pause");
+            exit(0);
+        }
+        cout<<"depth : ";
+        cin>>depth;
+        idepth = convertStringToInt(depth);
+        if(idepth<0){
+            cout<<"invalid depth value\n";
+            system("pause");
+            exit(0);
+        }
+    }
+    download_html(address,target_folder,idepth);
+
+    system("pause");
+    exit(0);
+    return 0;
+}
+
+
+
