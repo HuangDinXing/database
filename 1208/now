@@ -1,0 +1,167 @@
+import React, { useEffect, useState } from "react";
+import AppNavbar from "./AppNavbar";
+import "./HistoryOrderDetailStyles.css";
+
+const HistoryOrderDetail = () => {
+  const userId = localStorage.getItem("userId");
+  const [orderDetails, setOrderDetails] = useState(null); // 儲存單個訂單詳情
+  const [orders, setOrders] = useState([]); // 儲存過往訂單
+  const [loading, setLoading] = useState(true);
+  const [address, setAddress] = useState("");
+  const orderID = localStorage.getItem("selectedOrderId"); // 從本地存儲獲取 orderID
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 獲取地址資料
+        const addressResponse = await fetch("http://127.0.0.1:5000/history_orders_detail", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }),
+        });
+
+        if (!addressResponse.ok) {
+          throw new Error(`Error fetching address: ${addressResponse.statusText}`);
+        }
+        const addressData = await addressResponse.json();
+        setAddress(addressData.address);
+
+        // 獲取特定訂單資料
+        const orderResponse = await fetch("http://127.0.0.1:5000/history_orders1", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }), // 使用 userId 獲取過往訂單
+        });
+
+        if (!orderResponse.ok) {
+          throw new Error(`Error fetching orders: ${orderResponse.statusText}`);
+        }
+
+        const orderData = await orderResponse.json();
+        console.log("API 回傳資料:", orderData);
+        setOrders(orderData);
+        
+        // 獲取特定訂單詳情
+        if (orderID) {
+          const detailResponse = await fetch("http://127.0.0.1:5000/history_order_detail", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ orderID }),
+          });
+
+          if (!detailResponse.ok) {
+            throw new Error(`Error fetching order details: ${detailResponse.statusText}`);
+          }
+
+          const detailData = await detailResponse.json();
+          setOrderDetails(detailData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId, orderID]);
+
+  const handleOrderClick = (id) => {
+    localStorage.setItem("selectedOrderId", id); // 儲存選中的訂單ID
+    window.location.reload(); // 重新加載頁面以顯示選中的訂單詳情
+  };
+
+  if (loading) {
+    return <div className="loading">載入中...</div>;
+  }
+
+  return (
+    <div className="HistoryOrderdetail-page">
+        <AppNavbar />
+        <div className="name-box-container">
+            <p className="my-account">訂單紀錄 {'>'} 訂單詳情</p>
+        </div>
+      
+        <div className="orders-list">
+            <div className="orders-container">
+            {orders.length === 0 ? (
+                <p className="no-orders">目前沒有過往訂單。</p>
+            ) : (
+                orders.map((order) => (
+                <div
+                    key={order.orderID}
+                    className="order-box"
+                    onClick={() => handleOrderClick(order.orderID)} // 處理點擊事件
+                >
+                    <h1 className="storeName">{order.storeName}</h1>
+                    <h2 className="order">Order #{order.orderID}</h2>
+                    <h2 className="time">外送於: {order.time}</h2>
+                    {order.storeImage && (
+                    <div className="store-image">
+                        <img
+                        src={order.storeImage}
+                            alt={order.storeName}
+                            className="store-img"
+                            style={{ maxWidth: "150px", height: "auto" }}
+                            />
+                        </div>
+                        )}
+                        
+                    </div>
+                    ))
+                )}
+                </div>
+
+
+
+
+            <div className="orders-container">
+            {orders.length === 0 ? (
+                <p className="no-orders">目前沒有過往訂單。</p>
+            ) : (
+                orders.map((order) => (
+                <div>
+                    <p className="left">訂單</p>
+                    <div className="left">
+                        {order.meals.map((meal) => (
+                            <div key={meal.mealID} className="meal-item">
+                            <p>{meal.quantity} x {meal.mealName}</p>
+                            </div>
+                        ))}
+                        </div>
+                    <h2 className="right">${order.money}</h2>
+
+                    <p className="left">小計</p>
+
+
+                    
+                    
+                        
+                    </div>
+                    ))
+                )}
+                </div>
+
+
+
+
+        </div>
+
+
+        
+
+
+
+
+
+    </div>
+  );
+};
+
+export default HistoryOrderDetail;
