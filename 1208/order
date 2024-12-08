@@ -1,0 +1,101 @@
+import React, { useEffect, useState } from "react";
+import AppNavbar from "./AppNavbar";
+import "./HistoryOrder.css";
+import { useNavigate } from 'react-router-dom'; // 引入 useNavigate
+
+const id = localStorage.getItem("userId");
+
+const HistoryOrder = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // 在這裡使用 useNavigate
+
+
+  const handleOrderClick = (orderID) => {
+    // 導航到訂單詳情頁面，並傳遞 orderID
+    navigate(`/historyOrderdetail/${orderID}`); 
+  };
+  useEffect(() => {
+    // 從後端 API 獲取訂單資料
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/history_orders", { // 確保使用正確的後端 URL
+          method: "POST", // 使用 POST 請求
+          headers: {
+            "Content-Type": "application/json", // 確保傳送 JSON 格式
+          },
+          body: JSON.stringify({ userId: id }), // 將 userId 傳遞給後端
+        });
+
+        if (!response.ok) {
+          console.error(`Error: ${response.status} - ${response.statusText}`);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("API 回傳資料:", data); // 印出接收到的資料
+        setOrders(data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [id]);
+
+  if (loading) {
+    return <div className="loading">載入中...</div>;
+  }
+
+  return (
+    <div className="HistoryOrder-page">
+      <AppNavbar />
+      <div className="name-box-container">
+        <h1 className="my-account">過往訂單</h1>
+      </div>
+      {/* 增加 margin-top 確保訂單列表位於標題下方 */}
+      <div className="orders-container">
+        {orders.length === 0 ? (
+          <p className="no-orders">目前沒有過往訂單。</p>
+        ) : (
+          orders.map((order) => (
+            <div
+              key={order.orderID}
+              className="order-box"
+              onClick={() => handleOrderClick(order.orderID)} // 處理點擊事件
+            >
+              <h1 className="storeName">{order.storeName}</h1>
+              <h2 className="order">Order #{order.orderID}</h2>
+              <h2 className="time">外送於: {order.time}</h2>
+              <h2 className="money">${order.money}</h2>
+              {order.storeImage && (
+                <div className="store-image">
+                  <img
+                    src={order.storeImage}
+                    alt={order.storeName}
+                    className="store-img"
+                    style={{ maxWidth: "150px", height: "auto" }}
+                  />
+                </div>
+              )}
+              <div className="meals-container">
+                {order.meals.map((meal) => (
+                  <div key={meal.mealID} className="meal-item">
+                    <p>
+                      {meal.quantity}x {meal.mealName}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+    </div>
+  );
+};
+
+export default HistoryOrder;
