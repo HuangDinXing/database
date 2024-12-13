@@ -1,0 +1,116 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def read_raw_image(file_path):
+    with open(file_path, 'rb') as f:
+        image = np.fromfile(f, dtype=np.uint8)
+    return image
+
+def create_rgb_image(raw_image):
+    # 設定圖像的寬度和高度
+    
+    # 切割為 R、G、B 通道
+    r_channel = raw_image[:height*width].reshape(height, width)
+    g_channel = raw_image[height*width:2*height*width].reshape(height, width)
+    b_channel = raw_image[2*height*width:].reshape(height, width)
+
+    # 合併 R、G、B 通道為 RGB 圖像
+    rgb_image = np.dstack((r_channel, g_channel, b_channel))
+
+    return r_channel, g_channel, b_channel, rgb_image
+
+def rgb_to_yuv(rgb_image):
+    # 將 RGB 圖像轉換為 YUV 圖像
+    y = 0.299 * rgb_image[:, :, 0] + 0.587 * rgb_image[:, :, 1] + 0.114 * rgb_image[:, :, 2]
+    u = -0.169 * rgb_image[:, :, 0] - 0.331 * rgb_image[:, :, 1] + 0.5 * rgb_image[:, :, 2] + 128
+    v = 0.5 * rgb_image[:, :, 0] - 0.419 * rgb_image[:, :, 1] - 0.081 * rgb_image[:, :, 2] + 128
+
+    return y, u, v
+
+def downsample_uv(u, v):
+    # 將 U 和 V 通道降采样到 256x256 分辨率
+    u_downsampled = u[::2, ::2]
+    v_downsampled = v[::2, ::2]
+
+    return u_downsampled, v_downsampled
+
+def upsample_uv(u_downsampled, v_downsampled, height, width):
+    # 將降采样的 U 和 V 通道放大到原始分辨率
+    u_upsampled = np.repeat(np.repeat(u_downsampled, 2, axis=0), 2, axis=1)[:height, :width]
+    v_upsampled = np.repeat(np.repeat(v_downsampled, 2, axis=0), 2, axis=1)[:height, :width]
+
+    return u_upsampled, v_upsampled
+
+def yuv_to_rgb(y, u, v):
+    # 將 YUV 圖像轉換為 RGB 圖像
+    r = y + 1.14 * (v - 128)
+    g = y - 0.39 * (u - 128) - 0.58 * (v - 128)
+    b = y + 2.03 * (u - 128)
+
+    # 將 R、G、B 值限制在 0-255 範圍內
+    r = np.clip(r, 0, 255)
+    g = np.clip(g, 0, 255)
+    b = np.clip(b, 0, 255)
+
+    rgb_image = np.dstack((r.astype(np.uint8), g.astype(np.uint8), b.astype(np.uint8)))
+    return rgb_image
+
+# 主程式
+
+width = 225
+height = 225
+#width =512
+#height =512
+
+
+#raw_image = read_raw_image('baboon.raw')
+#raw_image = read_raw_image('lena.raw')
+#raw_image = read_raw_image('nishida_0.raw')
+raw_image = read_raw_image('yuji_0.raw')
+
+r_channel, g_channel, b_channel, rgb_image = create_rgb_image(raw_image)
+
+# 將 RGB 圖像轉換為 YUV 圖像
+y, u, v = rgb_to_yuv(rgb_image)
+
+# 對 U 和 V 通道進行降采样和放大
+u_downsampled, v_downsampled = downsample_uv(u, v)
+u_upsampled, v_upsampled = upsample_uv(u_downsampled, v_downsampled, u.shape[0], u.shape[1])
+
+# 將 YU'V' 轉換為 R'G'B'
+rgb_image_new = yuv_to_rgb(y, u_upsampled, v_upsampled)
+
+# 顯示結果
+fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+
+axes[0, 1].imshow(r_channel, cmap='gray')
+axes[0, 1].set_title('R Channel')
+
+axes[0, 2].imshow(g_channel, cmap='gray')
+axes[0, 2].set_title('G Channel')
+
+axes[0, 3].imshow(b_channel, cmap='gray')
+axes[0, 3].set_title('B Channel')
+
+axes[0, 0].imshow(rgb_image, cmap='gray')
+axes[0, 0].set_title('Original RGB Image')
+
+axes[0, 4].imshow(y, cmap='gray')
+axes[0, 4].set_title('Y Channel')
+
+axes[1, 0].imshow(u_upsampled, cmap='gray')
+axes[1, 0].set_title('U Channel')
+
+axes[1, 1].imshow(v_upsampled, cmap='gray')
+axes[1, 1].set_title('V Channel')
+
+axes[1, 2].imshow(u_downsampled, cmap='gray')
+axes[1, 2].set_title('U\' Channel')
+
+axes[1, 3].imshow(v_downsampled, cmap='gray')
+axes[1, 3].set_title('V\' Channel')
+
+axes[1, 4].imshow(rgb_image_new.astype(np.uint8))
+axes[1, 4].set_title('New RGB Image')
+
+plt.show()
