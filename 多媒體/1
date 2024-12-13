@@ -1,0 +1,31 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def read_raw_image(file_path):
+    with open(file_path, 'rb') as f:
+        image = np.fromfile(f, dtype=np.uint8)
+    return image
+
+def create_rgb_image(raw_image):
+    # 計算圖像的寬度和高度
+    height = int(len(raw_image) / 3 / 512)
+    width = 512
+
+    # 切割為 R、G、B 通道
+    r_channel = raw_image[:height*width].reshape(height, width)
+    g_channel = raw_image[height*width:2*height*width].reshape(height, width)
+    b_channel = raw_image[2*height*width:].reshape(height, width)
+
+    # 合併 R、G、B 通道為 RGB 圖像
+    rgb_image = np.dstack((r_channel, g_channel, b_channel))
+
+    return rgb_image
+
+# 主程式
+raw_image = read_raw_image('lena.raw')
+rgb_image = create_rgb_image(raw_image)
+
+# 顯示圖像
+plt.imshow(rgb_image)
+plt.axis('off')
+plt.show()
